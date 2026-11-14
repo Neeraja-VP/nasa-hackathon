@@ -12,6 +12,7 @@ import {
   Activity,
   Menu,
   X,
+  Bot,
 } from 'lucide-react';
 
 export const NAVIGATION_TABS = [
@@ -23,6 +24,7 @@ export const NAVIGATION_TABS = [
   { id: 'compare', label: 'Compare Sites', icon: Scale },
   { id: 'ranking', label: 'MCDA Ranking', icon: Sliders },
   { id: 'simulation', label: 'Power Simulation', icon: BatteryCharging },
+  { id: 'assistant', label: 'AI Assistant', icon: Bot },
 ];
 
 export default function Header({

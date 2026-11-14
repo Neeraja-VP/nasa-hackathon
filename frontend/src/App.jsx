@@ -9,6 +9,7 @@ import EarthVisualization from './components/visualization/EarthVisualization';
 import TerrainHorizonView from './components/visualization/TerrainHorizonView';
 import SiteRecommendation from './components/mcda/SiteRecommendation';
 import PowerSimulation from './components/simulation/PowerSimulation';
+import AIMissionAssistant from './components/assistant/AIMissionAssistant';
 import LoadingState from './components/common/LoadingState';
 import ErrorState from './components/common/ErrorState';
 import { useSites } from './hooks/useSites';
@@ -199,6 +200,14 @@ export default function App() {
           {/* VIEW: 8. POWER & ENERGY SIMULATION */}
           {!sitesLoading && sites.length > 0 && activeTab === 'simulation' && (
             <PowerSimulation
+              currentSite={selectedSite}
+              missionConfig={missionConfig}
+            />
+          )}
+
+          {/* VIEW: 9. AI MISSION ASSISTANT (Member 4 Integration) */}
+          {!sitesLoading && sites.length > 0 && activeTab === 'assistant' && (
+            <AIMissionAssistant
               currentSite={selectedSite}
               missionConfig={missionConfig}
             />

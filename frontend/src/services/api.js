@@ -85,6 +85,12 @@ export const simulateMission = async (params) => {
   return response.data;
 };
 
+// 9. AI Mission Assistant (Member 4 Integration)
+export const queryAssistant = async (params) => {
+  const response = await apiClient.post('/assistant', params);
+  return response.data;
+};
+
 // Health Check
 export const checkHealth = async () => {
   const response = await apiClient.get('/health');
