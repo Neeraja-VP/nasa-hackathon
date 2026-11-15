@@ -33,6 +33,10 @@ class TerrainHorizonEngine:
         self.dem_loader = loader or dem_loader
         self._profile_cache: Dict[Tuple[float, float, float, float, float, float], TerrainHorizonResponse] = {}
 
+    def clear_cache(self) -> None:
+        """Clear horizon profile cache."""
+        self._profile_cache.clear()
+
     def _get_cache_key(self, request: TerrainHorizonRequest) -> Tuple[float, float, float, float, float, float]:
         return (
             round(request.latitude, 4),
@@ -68,12 +72,18 @@ class TerrainHorizonEngine:
         min_el = min(elevations) if elevations else 0.0
         avg_el = round(sum(elevations) / len(elevations), 2) if elevations else 0.0
 
+        meta = self.dem_loader.get_metadata()
+
         response = TerrainHorizonResponse(
             latitude=request.latitude,
             longitude=request.longitude,
             elevation_m=request.elevation_m,
             observer_height_m=request.observer_height_m,
-            elevation_datum="Lunar Sphere R=1737.4 km (NASA LOLA)",
+            elevation_datum=meta.get("elevation_datum", "Lunar Sphere R=1737.4 km (NASA LOLA)"),
+            terrain_data_source=meta.get("terrain_data_source", "NASA LOLA RASTER DEM (1200m/px)"),
+            dem_resolution_m=meta.get("dem_resolution_m", 1200.0),
+            is_procedural_fallback=meta.get("is_procedural_fallback", False),
+            data_quality_warning=meta.get("data_quality_warning"),
             horizon_points=horizon_points,
             max_horizon_elevation_deg=round(max_el, 2),
             min_horizon_elevation_deg=round(min_el, 2),

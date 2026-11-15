@@ -148,26 +148,36 @@ class DemLoader:
     def _load_best_available_dem(self):
         """
         Attempts to load:
-        1. GeoTIFF / NPZ in datasets/dem/
-        2. Cached benchmark tile
-        3. Initializes calibrated analytical LOLA topography model
+        1. High-resolution GeoTIFF (lola_south_pole_100m.tif) in datasets/dem/
+        2. Benchmark NPZ (lola_south_pole_benchmark.npz)
+        3. Benchmark GeoTIFF (lola_south_pole_benchmark.tif)
+        4. Initializes calibrated analytical LOLA topography model
         """
         # Look for existing raster files
-        npz_path = os.path.join(self.dem_dir, "lola_south_pole_benchmark.npz")
-        tif_path = os.path.join(self.dem_dir, "lola_south_pole_100m.tif")
-        
-        if os.path.isfile(npz_path):
+        tif_100m = os.path.join(self.dem_dir, "lola_south_pole_100m.tif")
+        npz_benchmark = os.path.join(self.dem_dir, "lola_south_pole_benchmark.npz")
+        tif_benchmark = os.path.join(self.dem_dir, "lola_south_pole_benchmark.tif")
+
+        if os.path.isfile(tif_100m):
             try:
-                self.load_npz(npz_path)
-                logger.info(f"Loaded LOLA DEM from NPZ: {npz_path}")
+                self.load_geotiff(tif_100m, pixel_scale_m=100.0)
+                logger.info(f"Loaded high-res LOLA DEM from GeoTIFF: {tif_100m}")
+                return
+            except Exception as e:
+                logger.warning(f"Failed to load 100m GeoTIFF DEM: {e}")
+
+        if os.path.isfile(npz_benchmark):
+            try:
+                self.load_npz(npz_benchmark)
+                logger.info(f"Loaded LOLA DEM from NPZ: {npz_benchmark}")
                 return
             except Exception as e:
                 logger.warning(f"Failed to load NPZ DEM: {e}")
-                
-        if os.path.isfile(tif_path):
+
+        if os.path.isfile(tif_benchmark):
             try:
-                self.load_geotiff(tif_path)
-                logger.info(f"Loaded LOLA DEM from GeoTIFF: {tif_path}")
+                self.load_geotiff(tif_benchmark, pixel_scale_m=1200.0)
+                logger.info(f"Loaded LOLA DEM from GeoTIFF: {tif_benchmark}")
                 return
             except Exception as e:
                 logger.warning(f"Failed to load GeoTIFF DEM: {e}")
@@ -178,11 +188,11 @@ class DemLoader:
         """
         data = np.load(filepath)
         elevation = data["elevation"]
-        pixel_scale_m = float(data.get("pixel_scale_m", 100.0))
+        pixel_scale_m = float(data.get("pixel_scale_m", 1200.0))
         center_pixel_x = float(data.get("center_pixel_x", elevation.shape[1] / 2.0))
         center_pixel_y = float(data.get("center_pixel_y", elevation.shape[0] / 2.0))
         product_id = str(data.get("product_id", "NASA_LOLA_NPZ"))
-        
+
         dataset = LolaDemDataset(
             elevation_data=elevation,
             pixel_scale_m=pixel_scale_m,
@@ -193,20 +203,26 @@ class DemLoader:
         self.active_dataset = dataset
         return dataset
 
-    def load_geotiff(self, filepath: str) -> LolaDemDataset:
+    def load_geotiff(self, filepath: str, pixel_scale_m: Optional[float] = None) -> LolaDemDataset:
         """
         Load elevation grid from GeoTIFF using Pillow.
         """
         from PIL import Image
         img = Image.open(filepath)
         elevation = np.array(img, dtype=np.float32)
-        
-        # Read standard LOLA 100m polar stereographic parameters
+
         h, w = elevation.shape
-        center_x = w / 2.0
-        center_y = h / 2.0
-        pixel_scale_m = 100.0
-        
+        center_x = (w - 1) / 2.0
+        center_y = (h - 1) / 2.0
+
+        if pixel_scale_m is None:
+            if "100m" in filepath:
+                pixel_scale_m = 100.0
+            elif "benchmark" in filepath or (w == 251 and h == 251):
+                pixel_scale_m = 1200.0
+            else:
+                pixel_scale_m = 1000.0
+
         dataset = LolaDemDataset(
             elevation_data=elevation,
             pixel_scale_m=pixel_scale_m,
@@ -216,6 +232,32 @@ class DemLoader:
         )
         self.active_dataset = dataset
         return dataset
+
+    def get_metadata(self) -> Dict[str, Any]:
+        """
+        Return dataset provenance, spatial resolution, and coverage metadata.
+        """
+        if self.active_dataset is not None:
+            return {
+                "terrain_data_source": f"NASA LOLA RASTER DEM ({self.active_dataset.product_id}, {self.active_dataset.pixel_scale_m:.0f}m/px)",
+                "dem_resolution_m": float(self.active_dataset.pixel_scale_m),
+                "is_procedural_fallback": False,
+                "product_id": self.active_dataset.product_id,
+                "coverage": "Lunar South Pole (80°S - 90°S)",
+                "elevation_datum": "Lunar Sphere R=1737.4 km (NASA LOLA)",
+                "grid_shape": [self.active_dataset.height, self.active_dataset.width],
+                "data_quality_warning": None
+            }
+        return {
+            "terrain_data_source": "PROCEDURAL LOLA TOPOGRAPHY FALLBACK",
+            "dem_resolution_m": 0.0,
+            "is_procedural_fallback": True,
+            "product_id": "PROCEDURAL_SYNTHETIC",
+            "coverage": "Lunar South Pole (80°S - 90°S)",
+            "elevation_datum": "Lunar Sphere R=1737.4 km (NASA LOLA)",
+            "grid_shape": None,
+            "data_quality_warning": "Real raster DEM not loaded; using calibrated procedural LOLA model."
+        }
 
     def sample_elevation(self, lat_deg: float, lon_deg: float) -> float:
         """

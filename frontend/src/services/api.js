@@ -55,6 +55,11 @@ export const getTerrainHorizon = async (params) => {
   return response.data;
 };
 
+export const getSkyHorizon = async (params) => {
+  const response = await apiClient.post('/terrain/sky-horizon', params);
+  return response.data;
+};
+
 // 4. Solar Illumination Engine
 export const calculateIllumination = async (params) => {
   const response = await apiClient.post('/illumination', params);
@@ -67,9 +72,20 @@ export const calculateCommunication = async (params) => {
   return response.data;
 };
 
-// 6. Site Comparison
+// 6. Site & Scenario Comparison
 export const compareSites = async (params) => {
   const response = await apiClient.post('/compare', params);
+  return response.data;
+};
+
+export const compareScenarios = async (params) => {
+  const response = await apiClient.post('/compare/scenarios', params);
+  return response.data;
+};
+
+// Custom Landing Site Evaluation
+export const createCustomSite = async (params) => {
+  const response = await apiClient.post('/sites/custom', params);
   return response.data;
 };
 

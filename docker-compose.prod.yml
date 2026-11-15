@@ -6,9 +6,9 @@ services:
     container_name: luna-database-prod
     restart: always
     environment:
-      POSTGRES_USER: luna_user
-      POSTGRES_PASSWORD: luna_password
-      POSTGRES_DB: luna_navigator
+      POSTGRES_USER: ${POSTGRES_USER:-luna_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-luna_password}
+      POSTGRES_DB: ${POSTGRES_DB:-luna_navigator}
     ports:
       - "5432:5432"
     volumes:
@@ -29,13 +29,19 @@ services:
       database:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql://luna_user:luna_password@database:5432/luna_navigator
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-luna_user}:${POSTGRES_PASSWORD:-luna_password}@database:5432/${POSTGRES_DB:-luna_navigator}
       - ENVIRONMENT=production
-      - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:80,http://localhost:3000
+      - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:80,http://localhost:3000,http://localhost
+      - HORIZONS_API_BASE_URL=https://ssd.jpl.nasa.gov/api/horizons.api
     ports:
       - "8000:8000"
     volumes:
       - ./datasets:/datasets
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
   frontend:
     build:

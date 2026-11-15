@@ -9,6 +9,8 @@ import {
   Sparkles,
   ArrowRight,
   TrendingUp,
+  BatteryCharging,
+  WifiOff,
 } from 'lucide-react';
 import { recommendSites } from '../../services/api';
 import {
@@ -56,9 +58,13 @@ export default function SiteRecommendation({
   const applyPreset = (presetKey) => {
     const p = MCDA_WEIGHT_PRESETS[presetKey];
     if (p) {
-      setWeights(p.weights);
+      setWeights((prev) => ({ ...prev, ...p.weights }));
     }
   };
+
+  // Calculate sum of weights for user preview
+  const sumWeights = Object.values(weights).reduce((a, b) => a + (Number(b) || 0), 0);
+  const normWeight = (w) => (sumWeights > 0 ? ((Number(w) || 0) / sumWeights) * 100 : 0);
 
   // Rank medal colors
   const getRankBadge = (rank) => {
@@ -98,7 +104,7 @@ export default function SiteRecommendation({
               <span>Multi-Criteria Decision Analysis (MCDA) Scoring Engine</span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Formally weight operational criteria to evaluate and rank candidate landing sites.
+              Weight 6 operational criteria with automatic L1 normalization to evaluate and rank candidate landing sites.
             </p>
           </div>
 
@@ -128,12 +134,13 @@ export default function SiteRecommendation({
           </div>
         </div>
 
-        {/* Weights Sliders */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+        {/* Weights Sliders (6 Criteria) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+          {/* 1. Solar */}
           <div className="rounded-xl border border-luna-800 bg-luna-950/60 p-3 space-y-1.5">
             <div className="flex justify-between text-xs font-mono">
-              <span className="text-slate-400">Solar Sunlight</span>
-              <span className="text-amber-400 font-bold">{(weights.solar_illumination * 100).toFixed(0)}%</span>
+              <span className="text-slate-400">Solar Illumination</span>
+              <span className="text-amber-400 font-bold">{normWeight(weights.solar_illumination).toFixed(0)}% (w: {weights.solar_illumination})</span>
             </div>
             <input
               type="range"
@@ -146,10 +153,11 @@ export default function SiteRecommendation({
             />
           </div>
 
+          {/* 2. Comm */}
           <div className="rounded-xl border border-luna-800 bg-luna-950/60 p-3 space-y-1.5">
             <div className="flex justify-between text-xs font-mono">
               <span className="text-slate-400">Earth Comm (DTE)</span>
-              <span className="text-cyan-400 font-bold">{(weights.earth_communication * 100).toFixed(0)}%</span>
+              <span className="text-cyan-400 font-bold">{normWeight(weights.earth_communication).toFixed(0)}% (w: {weights.earth_communication})</span>
             </div>
             <input
               type="range"
@@ -162,10 +170,11 @@ export default function SiteRecommendation({
             />
           </div>
 
+          {/* 3. Slope */}
           <div className="rounded-xl border border-luna-800 bg-luna-950/60 p-3 space-y-1.5">
             <div className="flex justify-between text-xs font-mono">
               <span className="text-slate-400">Slope Safety</span>
-              <span className="text-emerald-400 font-bold">{(weights.slope_safety * 100).toFixed(0)}%</span>
+              <span className="text-emerald-400 font-bold">{normWeight(weights.slope_safety).toFixed(0)}% (w: {weights.slope_safety})</span>
             </div>
             <input
               type="range"
@@ -178,10 +187,11 @@ export default function SiteRecommendation({
             />
           </div>
 
+          {/* 4. Elevation */}
           <div className="rounded-xl border border-luna-800 bg-luna-950/60 p-3 space-y-1.5">
             <div className="flex justify-between text-xs font-mono">
-              <span className="text-slate-400">Elevation Relief</span>
-              <span className="text-purple-400 font-bold">{(weights.elevation_advantage * 100).toFixed(0)}%</span>
+              <span className="text-slate-400">Topographic Elevation</span>
+              <span className="text-purple-400 font-bold">{normWeight(weights.elevation_advantage).toFixed(0)}% (w: {weights.elevation_advantage})</span>
             </div>
             <input
               type="range"
@@ -193,14 +203,54 @@ export default function SiteRecommendation({
               className="w-full accent-purple-500"
             />
           </div>
+
+          {/* 5. Power Survival (New) */}
+          <div className="rounded-xl border border-luna-800 bg-luna-950/60 p-3 space-y-1.5">
+            <div className="flex justify-between text-xs font-mono">
+              <span className="text-slate-400 flex items-center space-x-1">
+                <BatteryCharging className="h-3.5 w-3.5 text-lime-400 inline" />
+                <span>Power Survival</span>
+              </span>
+              <span className="text-lime-400 font-bold">{normWeight(weights.power_survival ?? 0).toFixed(0)}% (w: {weights.power_survival ?? 0})</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={weights.power_survival ?? 0}
+              onChange={(e) => setWeights({ ...weights, power_survival: Number(e.target.value) })}
+              className="w-full accent-lime-500"
+            />
+          </div>
+
+          {/* 6. Blackout Risk (New) */}
+          <div className="rounded-xl border border-luna-800 bg-luna-950/60 p-3 space-y-1.5">
+            <div className="flex justify-between text-xs font-mono">
+              <span className="text-slate-400 flex items-center space-x-1">
+                <WifiOff className="h-3.5 w-3.5 text-rose-400 inline" />
+                <span>Blackout Risk Mitigation</span>
+              </span>
+              <span className="text-rose-400 font-bold">{normWeight(weights.blackout_risk ?? 0).toFixed(0)}% (w: {weights.blackout_risk ?? 0})</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={weights.blackout_risk ?? 0}
+              onChange={(e) => setWeights({ ...weights, blackout_risk: Number(e.target.value) })}
+              className="w-full accent-rose-500"
+            />
+          </div>
         </div>
 
         {/* Operational Constraint Cutoffs */}
         <div className="pt-3 border-t border-luna-800/80 space-y-2">
           <span className="text-[11px] font-mono text-slate-400 uppercase">Operational Constraint Limits:</span>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-xs font-mono">
             <div>
-              <label className="text-slate-500 block text-[10px]">Min Illumination</label>
+              <label className="text-slate-500 block text-[10px]">Min Illumination (%)</label>
               <input
                 type="number"
                 min="0"
@@ -211,7 +261,7 @@ export default function SiteRecommendation({
               />
             </div>
             <div>
-              <label className="text-slate-500 block text-[10px]">Min Earth Comm</label>
+              <label className="text-slate-500 block text-[10px]">Min Earth Comm (%)</label>
               <input
                 type="number"
                 min="0"
@@ -222,7 +272,7 @@ export default function SiteRecommendation({
               />
             </div>
             <div>
-              <label className="text-slate-500 block text-[10px]">Max Slope Angle</label>
+              <label className="text-slate-500 block text-[10px]">Max Slope Angle (°)</label>
               <input
                 type="number"
                 min="1"
@@ -233,7 +283,7 @@ export default function SiteRecommendation({
               />
             </div>
             <div>
-              <label className="text-slate-500 block text-[10px]">Max Shadow Hours</label>
+              <label className="text-slate-500 block text-[10px]">Max Shadow Hours (h)</label>
               <input
                 type="number"
                 min="0"
@@ -243,11 +293,38 @@ export default function SiteRecommendation({
                 className="w-full rounded bg-luna-950 border border-luna-700 px-2 py-1 text-slate-200"
               />
             </div>
+            <div>
+              <label className="text-slate-500 block text-[10px]">Max Comm Blackout (h)</label>
+              <input
+                type="number"
+                min="0"
+                max="300"
+                value={constraints.max_comm_blackout_hours ?? 48.0}
+                onChange={(e) => setConstraints({ ...constraints, max_comm_blackout_hours: Number(e.target.value) })}
+                className="w-full rounded bg-luna-950 border border-luna-700 px-2 py-1 text-slate-200"
+              />
+            </div>
+            <div>
+              <label className="text-slate-500 block text-[10px]">Min Battery SoC (%)</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={constraints.min_battery_soc_percent ?? 20.0}
+                onChange={(e) => setConstraints({ ...constraints, min_battery_soc_percent: Number(e.target.value) })}
+                className="w-full rounded bg-luna-950 border border-luna-700 px-2 py-1 text-slate-200"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {loading && <LoadingState title="Computing Multi-Attribute Site Scoring..." subtitle="Evaluating normalization functions across solar flux, DTE availability, surface slopes, and topographic elevation." />}
+      {loading && (
+        <LoadingState
+          title="Computing Multi-Attribute Site Scoring..."
+          subtitle="Evaluating 6-criteria normalization functions across solar flux, DTE availability, surface slopes, topographic elevation, battery survival, and blackout risk."
+        />
+      )}
 
       {error && <ErrorState title="MCDA Ranking Error" message={error} onRetry={handleCalculateRanking} />}
 
@@ -294,9 +371,9 @@ export default function SiteRecommendation({
                     </div>
                   </div>
 
-                  {/* Score Breakdown Bars */}
+                  {/* Score Breakdown Bars (6 Criteria) */}
                   {item.scores_breakdown && (
-                    <div className="mt-3 pt-3 border-t border-luna-800/80 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                    <div className="mt-3 pt-3 border-t border-luna-800/80 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs font-mono">
                       <div>
                         <div className="flex justify-between text-[11px] mb-1">
                           <span className="text-slate-400">Solar</span>
@@ -345,6 +422,32 @@ export default function SiteRecommendation({
                           <div
                             className="h-full bg-purple-400 rounded-full"
                             style={{ width: `${item.scores_breakdown.elevation_advantage}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-[11px] mb-1">
+                          <span className="text-slate-400">Power Survival</span>
+                          <span className="text-lime-400">{item.scores_breakdown.power_survival ?? '—'}</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-luna-950 overflow-hidden">
+                          <div
+                            className="h-full bg-lime-400 rounded-full"
+                            style={{ width: `${item.scores_breakdown.power_survival ?? 0}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-[11px] mb-1">
+                          <span className="text-slate-400">Blackout Risk</span>
+                          <span className="text-rose-400">{item.scores_breakdown.blackout_risk ?? '—'}</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-luna-950 overflow-hidden">
+                          <div
+                            className="h-full bg-rose-400 rounded-full"
+                            style={{ width: `${item.scores_breakdown.blackout_risk ?? 0}%` }}
                           />
                         </div>
                       </div>

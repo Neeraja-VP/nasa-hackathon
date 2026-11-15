@@ -23,6 +23,7 @@ import {
 import MetricCard from '../common/MetricCard';
 import LoadingState from '../common/LoadingState';
 import ErrorState from '../common/ErrorState';
+import DataSourceBanner from '../common/DataSourceBanner';
 import { formatAngle } from '../../utils/formatters';
 
 export default function TerrainHorizonView({
@@ -64,6 +65,16 @@ export default function TerrainHorizonView({
 
   return (
     <div className="space-y-6">
+      {/* 0. DATA PROVENANCE & QUALITY TRANSPARENCY BANNER */}
+      <DataSourceBanner
+        ephemerisSource="NASA LOLA GEODETIC TOPOCENTRIC DATUM"
+        ephemerisType="NASA_LOLA_DATUM"
+        terrainSource={terrainData.terrain_data_source}
+        demResolutionM={terrainData.dem_resolution_m}
+        isProceduralFallback={terrainData.is_procedural_fallback}
+        warningMessage={terrainData.data_quality_warning}
+      />
+
       {/* 1. TOP HORIZON STATS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricCard

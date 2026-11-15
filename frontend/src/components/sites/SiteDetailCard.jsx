@@ -12,6 +12,7 @@ import {
   ArrowUpRight,
   Globe,
   Map,
+  Download,
 } from 'lucide-react';
 import { formatLatitude, formatLongitude } from '../../utils/coordinates';
 import { formatElevationM } from '../../utils/formatters';
@@ -31,6 +32,22 @@ export default function SiteDetailCard({
     );
   }
 
+  const handleExportDossier = () => {
+    const dossier = {
+      site,
+      illumination: illuminationData,
+      communication: communicationData,
+      exported_at: new Date().toISOString(),
+    };
+    const jsonStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(dossier, null, 2));
+    const link = document.createElement('a');
+    link.setAttribute('href', jsonStr);
+    link.setAttribute('download', `${site.id}_mission_dossier_${Date.now()}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
       {/* 1. HERO DOSSIER HEADER */}
@@ -47,6 +64,14 @@ export default function SiteDetailCard({
               <Badge variant={site.slope_degrees <= 8 ? 'emerald' : 'amber'}>
                 SLOPE: {site.slope_degrees}°
               </Badge>
+              <button
+                onClick={handleExportDossier}
+                className="flex items-center space-x-1 rounded-md border border-luna-700 bg-luna-900/80 px-2 py-0.5 text-[11px] font-mono text-cyan-300 hover:border-cyan-500 hover:bg-luna-800 transition-colors"
+                title="Export complete site telemetry dossier as JSON"
+              >
+                <Download className="h-3 w-3" />
+                <span>Export Dossier</span>
+              </button>
             </div>
 
             <h1 className="font-mono text-2xl md:text-3xl font-extrabold tracking-tight text-white">

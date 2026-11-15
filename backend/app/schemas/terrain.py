@@ -41,6 +41,22 @@ class TerrainHorizonResponse(BaseModel):
     elevation_m: float
     observer_height_m: float
     elevation_datum: str = "Lunar Sphere R=1737.4 km (NASA LOLA)"
+    terrain_data_source: str = Field(
+        default="NASA LOLA RASTER DEM (1200m/px)",
+        description="Dataset provenance: NASA LOLA raster DEM product or procedural topography fallback"
+    )
+    dem_resolution_m: float = Field(
+        default=1200.0,
+        description="Spatial grid resolution in meters per pixel"
+    )
+    is_procedural_fallback: bool = Field(
+        default=False,
+        description="True if procedural synthetic model was used instead of real DEM raster"
+    )
+    data_quality_warning: Optional[str] = Field(
+        default=None,
+        description="Warning notice if synthetic or degraded DEM resolution was used"
+    )
     horizon_points: List[HorizonPoint]
     max_horizon_elevation_deg: float
     min_horizon_elevation_deg: float

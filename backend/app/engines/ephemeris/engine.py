@@ -163,27 +163,60 @@ class EphemerisEngine:
         """
         Generate time-series of Sun and Earth topocentric positions for the given request.
         Adheres to docs/api-contracts.md Section 2.
+        Queries real NASA JPL Horizons Web API for both Sun (10) and Earth (399) when requested,
+        or uses high-fidelity analytical fallback when offline or unselected.
         """
         start = request.start_date
         if start.tzinfo is None:
             start = start.replace(tzinfo=timezone.utc)
 
-        data_source = "NASA JPL Horizons Web API / DE440 ephemeris"
+        fallback_warning: Optional[str] = None
 
-        # If live Horizons query was explicitly requested, attempt to query
+        # 1. Attempt Live/Cached NASA JPL Horizons Query if requested
         if request.use_live_horizons:
-            stop_time = start + timedelta(days=request.duration_days)
-            live_sun = horizons_client.query_live_horizons(
-                target_id="10",
+            raw_series, data_source_label, data_source_type, warning_msg = horizons_client.query_site_ephemeris_series(
                 lat=request.latitude,
                 lon=request.longitude,
                 elev_m=request.elevation_m,
                 start_date=start,
-                stop_date=stop_time,
+                duration_days=request.duration_days,
                 step_hours=request.step_hours
             )
-            if live_sun:
-                data_source = "NASA JPL Horizons Web API (Live DE440/LE440)"
+
+            if raw_series is not None and len(raw_series) > 0:
+                horizons_time_series: List[EphemerisPoint] = []
+                for pt in raw_series:
+                    ts = pt["timestamp"]
+                    se_lat, se_lon, _ = self.calculate_sub_earth_point(ts)
+                    horizons_time_series.append(EphemerisPoint(
+                        timestamp=ts,
+                        sun_azimuth_deg=round(pt["sun_azimuth_deg"], 2),
+                        sun_elevation_deg=round(pt["sun_elevation_deg"], 2),
+                        sun_distance_km=round(pt["sun_distance_km"], 1),
+                        earth_azimuth_deg=round(pt["earth_azimuth_deg"], 2),
+                        earth_elevation_deg=round(pt["earth_elevation_deg"], 2),
+                        earth_distance_km=round(pt["earth_distance_km"], 1),
+                        sub_earth_longitude_deg=round(se_lon, 2),
+                        sub_earth_latitude_deg=round(se_lat, 2)
+                    ))
+
+                return EphemerisResponse(
+                    site_coordinates=request,
+                    start_date=start,
+                    duration_days=request.duration_days,
+                    step_hours=request.step_hours,
+                    total_steps=len(horizons_time_series),
+                    data_source=data_source_label,
+                    data_source_type=data_source_type,
+                    data_quality_warning=None,
+                    time_series=horizons_time_series
+                )
+            else:
+                fallback_warning = warning_msg or "JPL Horizons query was requested but failed; reverted to analytical lunar ephemeris model."
+
+        # 2. Analytical Fallback Calculation (transparently marked as ANALYTICAL FALLBACK DATA)
+        data_source = "ANALYTICAL FALLBACK DATA"
+        data_source_type = "ANALYTICAL_FALLBACK"
 
         time_series: List[EphemerisPoint] = []
         total_hours = request.duration_days * 24.0
@@ -207,6 +240,8 @@ class EphemerisEngine:
             step_hours=request.step_hours,
             total_steps=len(time_series),
             data_source=data_source,
+            data_source_type=data_source_type,
+            data_quality_warning=fallback_warning,
             time_series=time_series
         )
 

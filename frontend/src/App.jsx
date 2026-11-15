@@ -7,6 +7,7 @@ import SiteComparison from './components/sites/SiteComparison';
 import SolarVisualization from './components/visualization/SolarVisualization';
 import EarthVisualization from './components/visualization/EarthVisualization';
 import TerrainHorizonView from './components/visualization/TerrainHorizonView';
+import SkyHorizonView from './components/visualization/SkyHorizonView';
 import SiteRecommendation from './components/mcda/SiteRecommendation';
 import PowerSimulation from './components/simulation/PowerSimulation';
 import AIMissionAssistant from './components/assistant/AIMissionAssistant';
@@ -36,6 +37,7 @@ export default function App() {
     error: sitesError,
     apiOnline,
     refetch: refetchSites,
+    addCustomSite,
   } = useSites();
 
   // Active Site Orbital & Terrain Analysis hook
@@ -98,6 +100,7 @@ export default function App() {
           sites={sites}
           selectedSiteId={selectedSiteId}
           onSelectSite={setSelectedSiteId}
+          onAddCustomSite={addCustomSite}
           loading={sitesLoading}
           isOpen={mobileSidebarOpen}
           onCloseMobile={() => setMobileSidebarOpen(false)}
@@ -203,6 +206,20 @@ export default function App() {
             />
           )}
 
+          {/* VIEW: 5.5 COMBINED SKY HORIZON VIEW */}
+          {!sitesLoading && sites.length > 0 && activeTab === 'skyhorizon' && (
+            <SkyHorizonView
+              currentSite={selectedSite}
+              missionConfig={missionConfig}
+              illuminationData={illuminationData}
+              communicationData={communicationData}
+              terrainHorizonData={terrainHorizonData}
+              loading={analysisLoading}
+              error={analysisError}
+              onRetry={() => {}}
+            />
+          )}
+
           {/* VIEW: 6. MULTI-SITE COMPARISON */}
           {!sitesLoading && sites.length > 0 && activeTab === 'compare' && (
             <SiteComparison
@@ -212,6 +229,7 @@ export default function App() {
                 setSelectedSiteId(id);
                 setActiveTab('overview');
               }}
+              onAddCustomSite={addCustomSite}
             />
           )}
 

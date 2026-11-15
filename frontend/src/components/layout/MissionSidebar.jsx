@@ -11,8 +11,10 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowUpRight,
+  Plus,
 } from 'lucide-react';
 import { formatLatitude, formatLongitude } from '../../utils/coordinates';
+import CustomSiteModal from '../sites/CustomSiteModal';
 
 export default function MissionSidebar({
   missionConfig,
@@ -20,6 +22,7 @@ export default function MissionSidebar({
   sites,
   selectedSiteId,
   onSelectSite,
+  onAddCustomSite,
   loading,
   isOpen,
   onCloseMobile,
@@ -27,6 +30,7 @@ export default function MissionSidebar({
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRegion, setFilterRegion] = useState('all');
   const [expandedConfig, setExpandedConfig] = useState(true);
+  const [isCustomSiteModalOpen, setIsCustomSiteModalOpen] = useState(false);
 
   // Filter candidate sites
   const filteredSites = sites.filter((site) => {
@@ -149,10 +153,21 @@ export default function MissionSidebar({
       {/* 2. CANDIDATE LANDING SITES CATALOG */}
       <div className="flex-1 flex flex-col min-h-0 space-y-2.5">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Candidate Sites ({filteredSites.length})
-          </h3>
-          {loading && <span className="font-mono text-[10px] text-cyan-400 animate-pulse">Scanning...</span>}
+          <div className="flex items-center space-x-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Candidate Sites ({filteredSites.length})
+            </h3>
+            {loading && <span className="font-mono text-[10px] text-cyan-400 animate-pulse">Scanning...</span>}
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsCustomSiteModalOpen(true)}
+            className="flex items-center space-x-1 rounded bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 text-[10px] font-mono font-semibold text-cyan-300 hover:bg-cyan-500/20 transition-colors"
+            title="Define a new lunar landing site using custom coordinates"
+          >
+            <Plus className="h-3 w-3" />
+            <span>CUSTOM</span>
+          </button>
         </div>
 
         {/* Search Input */}
@@ -243,6 +258,16 @@ export default function MissionSidebar({
           )}
         </div>
       </div>
+
+      {/* Custom Site Modal */}
+      <CustomSiteModal
+        isOpen={isCustomSiteModalOpen}
+        onClose={() => setIsCustomSiteModalOpen(false)}
+        onSiteCreated={(newSite) => {
+          if (onAddCustomSite) onAddCustomSite(newSite);
+          if (onSelectSite) onSelectSite(newSite.id);
+        }}
+      />
     </aside>
   );
 }

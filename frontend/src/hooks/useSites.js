@@ -44,6 +44,18 @@ export function useSites() {
     fetchSites();
   }, [fetchSites]);
 
+  const addCustomSite = useCallback((newSite) => {
+    if (!newSite || !newSite.id) return;
+    setSites((prev) => {
+      const exists = prev.some((s) => s.id === newSite.id);
+      if (exists) {
+        return prev.map((s) => (s.id === newSite.id ? newSite : s));
+      }
+      return [newSite, ...prev];
+    });
+    setSelectedSiteId(newSite.id);
+  }, []);
+
   const selectedSite = sites.find((s) => s.id === selectedSiteId) || sites[0] || null;
 
   return {
@@ -55,5 +67,6 @@ export function useSites() {
     error,
     apiOnline,
     refetch: fetchSites,
+    addCustomSite,
   };
 }

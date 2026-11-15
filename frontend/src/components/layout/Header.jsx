@@ -25,6 +25,7 @@ export const NAVIGATION_TABS = [
   { id: 'illumination', label: 'Solar Illumination', icon: Sun },
   { id: 'communication', label: 'Earth Comm (DTE)', icon: Radio },
   { id: 'terrain', label: 'Terrain Horizon', icon: Mountain },
+  { id: 'skyhorizon', label: 'Sky Horizon', icon: Compass },
   { id: 'compare', label: 'Compare Sites', icon: Scale },
   { id: 'ranking', label: 'MCDA Ranking', icon: Sliders },
   { id: 'simulation', label: 'Power Simulation', icon: BatteryCharging },

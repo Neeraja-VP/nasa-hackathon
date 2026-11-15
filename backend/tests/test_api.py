@@ -17,6 +17,15 @@ def test_health_endpoint():
     assert data["status"] == "HEALTHY"
     assert "LUNA NAVIGATOR" in data["service"]
 
+    # Test root and v1 health endpoints as well
+    res_root = client.get("/health")
+    assert res_root.status_code == 200
+    assert res_root.json()["status"] == "HEALTHY"
+
+    res_v1 = client.get("/api/v1/health")
+    assert res_v1.status_code == 200
+    assert res_v1.json()["status"] == "HEALTHY"
+
 
 def test_get_sites_catalog():
     res = client.get("/api/sites")

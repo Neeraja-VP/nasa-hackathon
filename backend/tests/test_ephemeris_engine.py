@@ -75,3 +75,64 @@ def test_ephemeris_time_series_generation():
     assert len(response.time_series) == 13
     assert response.time_series[0].timestamp == request.start_date
     assert response.time_series[-1].timestamp == request.start_date + timedelta(days=3)
+    # Check data source transparency tags
+    assert response.data_source == "ANALYTICAL FALLBACK DATA"
+    assert response.data_source_type == "ANALYTICAL_FALLBACK"
+    assert response.data_quality_warning is None
+
+
+def test_ephemeris_series_horizons_requested_fallback_warning():
+    """Verify that when live Horizons is requested but unreachable, fallback is transparently tagged with warning."""
+    from unittest.mock import patch
+    with patch("app.services.horizons_client.horizons_client.query_site_ephemeris_series") as mock_query:
+        mock_query.return_value = (None, "ANALYTICAL FALLBACK DATA", "ANALYTICAL_FALLBACK", "JPL Horizons query was requested but failed or timed out; reverted to analytical lunar ephemeris model.")
+        request = EphemerisRequest(
+            latitude=-89.78,
+            longitude=125.0,
+            elevation_m=1240.0,
+            start_date=datetime(2026, 12, 1, 0, 0, tzinfo=timezone.utc),
+            duration_days=1.0,
+            step_hours=6.0,
+            use_live_horizons=True
+        )
+        response = ephemeris_engine.calculate_ephemeris_series(request)
+        assert response.data_source == "ANALYTICAL FALLBACK DATA"
+        assert response.data_source_type == "ANALYTICAL_FALLBACK"
+        assert response.data_quality_warning is not None
+        assert "JPL Horizons query was requested but failed" in response.data_quality_warning
+        assert len(response.time_series) == 5
+
+
+def test_ephemeris_series_with_horizons_success():
+    """Verify that when Horizons data is available, it is faithfully returned with LIVE NASA HORIZONS DATA tag."""
+    from unittest.mock import patch
+    start = datetime(2026, 12, 1, 0, 0, tzinfo=timezone.utc)
+    mock_pts = [
+        {
+            "timestamp": start,
+            "sun_azimuth_deg": 142.30,
+            "sun_elevation_deg": 1.25,
+            "sun_distance_km": 147512400.0,
+            "earth_azimuth_deg": 310.40,
+            "earth_elevation_deg": 4.82,
+            "earth_distance_km": 384420.0
+        }
+    ]
+    with patch("app.services.horizons_client.horizons_client.query_site_ephemeris_series") as mock_query:
+        mock_query.return_value = (mock_pts, "LIVE NASA HORIZONS DATA", "LIVE_NASA_HORIZONS", None)
+        request = EphemerisRequest(
+            latitude=-89.78,
+            longitude=125.0,
+            elevation_m=1240.0,
+            start_date=start,
+            duration_days=0.04,
+            step_hours=1.0,
+            use_live_horizons=True
+        )
+        response = ephemeris_engine.calculate_ephemeris_series(request)
+        assert response.data_source == "LIVE NASA HORIZONS DATA"
+        assert response.data_source_type == "LIVE_NASA_HORIZONS"
+        assert response.data_quality_warning is None
+        assert len(response.time_series) == 1
+        assert response.time_series[0].sun_azimuth_deg == 142.30
+        assert response.time_series[0].earth_azimuth_deg == 310.40

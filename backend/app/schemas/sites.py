@@ -24,3 +24,12 @@ class SiteSchema(BaseModel):
 class SiteListResponse(BaseModel):
     total_sites: int
     sites: List[SiteSchema]
+
+
+class CustomSiteCreateRequest(BaseModel):
+    name: str = Field(default="Custom Landing Site", min_length=1, max_length=100, description="Site name")
+    latitude: float = Field(..., ge=-90.0, le=90.0, description="Selenographic latitude [-90 to +90]")
+    longitude: float = Field(..., ge=-180.0, le=360.0, description="Selenographic longitude [-180 to 360]")
+    elevation_m: Optional[float] = Field(default=None, description="Optional elevation in meters; sampled from LOLA DEM if None")
+    observer_height_m: float = Field(default=2.0, ge=0.0, le=50.0, description="Observer/lander mast height in meters")
+    description: Optional[str] = Field(default=None, description="Optional site notes")

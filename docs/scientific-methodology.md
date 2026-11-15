@@ -128,37 +128,91 @@ When Earth dips below the local terrain horizon, direct-to-Earth communication i
 
 ## 6. Mission Energy & Battery State-of-Charge (SoC) Simulation
 
-### 6.1 Solar Power Generation
-Solar irradiance at 1 AU is $S_0 = 1361\text{ W/m}^2$.
-For a solar array with area $A$, efficiency $\eta$, and orientation vector $\hat{n}_{panel}$:
-$$P_{gen}(t) = S_0 \cdot A \cdot \eta \cdot \max(0, \hat{n}_{panel} \cdot \hat{\rho}_{sun}(t)) \cdot \text{IlluminationFraction}(t)$$
+### 6.1 3D Solar Power Generation Physics
+Solar irradiance at 1 AU is $S_0 = 1361.0\text{ W/m}^2$.
+For a solar array with area $A$, base efficiency $\eta$, regolith dust obscuration factor $\eta_{\text{dust}} \in [0, 1]$, and cell temperature derating factor $\eta_{\text{thermal}} \in [0, 1]$:
 
-- **Vertical Azimuth-Tracking Panel**:
-  Rotates in azimuth to face the Sun continuously. Since the polar Sun is near the horizon ($El \approx 1.5^\circ$), a vertical panel has incidence angle:
-  $$\cos\theta_{inc} = \cos(El_{sun})$$
-  Because $El_{sun} \approx 1.5^\circ$, $\cos(1.5^\circ) \approx 0.9997$ (nearly 100% optimal capture!).
+$$P_{gen}(t) = S_0 \cdot A \cdot \eta \cdot \max(0, \cos\theta_{inc}(t)) \cdot \eta_{\text{dust}} \cdot \eta_{\text{thermal}} \cdot \mathbb{I}_{\text{terrain\_sunlit}}(t)$$
 
-### 6.2 Battery State of Charge (SoC)
-Let $P_{load}(t)$ be the total electrical load (avionics, payloads, survival heaters).
+#### 3D Vector Incidence Angle Formulation
+In topocentric observer coordinates (East $\hat{e}$, North $\hat{n}$, Zenith $\hat{u}$):
+- Sun unit vector at elevation $El$ and azimuth $Az$:
+  $$\hat{\rho}_{sun} = (\cos El \sin Az, \cos El \cos Az, \sin El)$$
+- Panel normal unit vector with tilt $\beta$ ($0^\circ = \text{horizontal flat}, 90^\circ = \text{vertical}$) and compass azimuth $\alpha$:
+  $$\hat{n}_{panel} = (\sin\beta \sin\alpha, \sin\beta \cos\alpha, \cos\beta)$$
+- Taking the inner product yields the true 3D cosine incidence angle:
+  $$\cos\theta_{inc} = \hat{n}_{panel} \cdot \hat{\rho}_{sun} = \sin(El)\cos(\beta) + \cos(El)\sin(\beta)\cos(Az - \alpha)$$
+
+- **Tracking Modes**:
+  1. **Vertical Azimuth-Tracking Panel ($\beta = 90^\circ$, $\alpha = Az$)**:
+     $$\cos\theta_{inc} = \cos(El_{sun})$$
+     Because the lunar polar Sun orbits near the horizon ($El \approx 1.5^\circ$), $\cos(1.5^\circ) \approx 0.9997$ (nearly 100% optimal flux capture!).
+  2. **Horizontal Flat Panel ($\beta = 0^\circ$)**:
+     $$\cos\theta_{inc} = \sin(El_{sun})$$
+     Yields only $\sin(1.5^\circ) \approx 0.026$ (over 97% cosine loss in polar grazing light).
+  3. **Fixed Tilted/Vertical Panel**:
+     Evaluates exact $(Az - \alpha)$ cosine azimuth variation as the Sun revolves $360^\circ$ over the 29.5-day synodic lunar day.
+
+### 6.2 Battery State of Charge (SoC) & C-Rate Dynamics
+Let $P_{load}(t) = P_{hotel} + P_{payload} + P_{heater}(t)$ be the total active power demand, where survival heaters engage when the lander is in shadow ($\mathbb{I}_{shadow} = 1$).
+
 $$\Delta P(t) = P_{gen}(t) - P_{load}(t)$$
 
-$$\Delta E(t) = \Delta P(t) \cdot \Delta t \cdot \begin{cases} \eta_{charge} & \text{if } \Delta P(t) > 0 \\ \frac{1}{\eta_{discharge}} & \text{if } \Delta P(t) < 0 \end{cases}$$
+Battery energy update accounts for dual-path charging and discharging efficiencies ($\eta_{chg}, \eta_{dis}$) and maximum C-rate power limitations ($P_{c\_max} = C_{wh} \times C_{rate}$):
+- When surplus power is generated ($\Delta P > 0$):
+  $$P_{charge}(t) = \min(\Delta P(t), P_{charge\_c\_rate\_max})$$
+  $$\Delta E_{stored}(t) = P_{charge}(t) \cdot \Delta t \cdot \eta_{chg}$$
+- When net deficit occurs ($\Delta P < 0$):
+  $$P_{discharge}(t) = \min(|\Delta P(t)|, P_{discharge\_c\_rate\_max})$$
+  $$\Delta E_{stored}(t) = -\frac{P_{discharge}(t) \cdot \Delta t}{\eta_{dis}}$$
 
-$$E_{stored}(t + \Delta t) = \text{clamp}\left(E_{stored}(t) + \Delta E(t), 0, E_{capacity}\right)$$
+$$E_{stored}(t + \Delta t) = \text{clamp}\left(E_{stored}(t) + \Delta E_{stored}(t), 0, E_{capacity}\right)$$
 $$\text{SoC}(t) = \frac{E_{stored}(t)}{E_{capacity}} \times 100\%$$
 
-If $\text{SoC}(t) < \text{SoC}_{critical}$, mission failure or low-power survival mode is triggered.
+*Model Disclaimer*: An isothermal battery cell temperature environment is assumed nominal. Flight-qualification cryogenic thermal modeling and active radioisotope heating are required for deep-cryogenic ($<100\text{ K}$) lunar night survival.
 
 ---
 
-## 7. Multi-Criteria Decision Analysis (MCDA) Scoring
+## 7. Direct-to-Earth (DTE) RF Link Budget Assessment
 
-To rank landing sites without subjective bias, a normalized weighted sum model is employed:
-$$Score(site) = \sum_{i=1}^{M} w_i \cdot S_i(site)$$
-Subject to $\sum w_i = 1.0$ and hard threshold constraints:
-- $S_{illum}$: Cumulative illumination percentage over mission duration
-- $S_{shadow}$: Negative penalty for longest consecutive shadow hours
-- $S_{comm}$: Earth DTE line-of-sight availability percentage
-- $S_{slope}$: Terrain slope penalty:
-  $$S_{slope} = \max\left(0, 1 - \frac{\theta_{slope}}{\theta_{max}}\right) \times 100$$
-- $S_{elev}$: Elevation advantage relative to regional mean
+Evaluating radio communication feasibility requires separating geometric line-of-sight clearance from electromagnetic link viability.
+
+### 7.1 Free Space Path Loss (FSPL)
+Over lunar distance $d_{\text{km}} \approx 384,400\text{ km}$ at carrier frequency $f_{\text{ghz}}$ (e.g. 2.2 GHz S-band or 8.4 GHz X-band):
+$$\text{FSPL}(\text{dB}) = 92.45 + 20\log_{10}(d_{\text{km}}) + 20\log_{10}(f_{\text{ghz}})$$
+
+### 7.2 Received Power and Link Margin
+The received power at the Deep Space Network (DSN) ground terminal is:
+$$P_{rx}(\text{dBm}) = P_{tx}(\text{dBm}) + G_{tx}(\text{dBi}) - \text{FSPL}(\text{dB}) + G_{rx}(\text{dBi}) - L_{sys}(\text{dB})$$
+Where:
+- $P_{tx}(\text{dBm}) = 10\log_{10}(P_{tx}(\text{W}) \times 1000)$
+- $G_{tx}$ = Lander High/Medium Gain Antenna (MGA/HGA) directional gain
+- $G_{rx}$ = DSN 34m/70m receiver antenna gain ($\sim 56\text{ dBi}$)
+- $L_{sys}$ = Cable, polarization, and atmospheric attenuation losses ($\sim 3.0\text{ dB}$)
+
+The link margin over receiver sensitivity threshold $P_{rx,min}$ (typically $-120\text{ dBm}$) is:
+$$\text{Margin}(\text{dB}) = P_{rx} - P_{rx,min}$$
+
+### 7.3 Antenna Pointing Constraints
+RF communication is declared feasible only when:
+1. Geometric line of sight is clear: $El_{earth} > H(Az_{earth})$.
+2. Earth elevation falls within antenna gimbal pointing limits: $\theta_{min} \le El_{earth} \le \theta_{max}$ (e.g. $0.5^\circ \le El \le 85.0^\circ$).
+3. Link margin satisfies mission threshold: $\text{Margin} \ge \text{Margin}_{req}$ (typically $3.0\text{ dB}$).
+
+---
+
+## 8. Multi-Criteria Decision Analysis (MCDA) Scoring
+
+To rank landing sites without subjective bias, a 6-criteria normalized weighted sum model is employed:
+$$Score(site) = \sum_{k=1}^{6} w'_k \cdot S_k(site)$$
+Where weights are L1 normalized: $w'_k = \frac{w_k}{\sum_{j=1}^6 w_j}$.
+
+The 6 operational criteria are:
+1. $S_{illum}$: Cumulative illumination percentage over mission duration ($0-100$).
+2. $S_{comm}$: Direct-to-Earth line-of-sight availability percentage ($0-100$).
+3. $S_{slope}$: Terrain touchdown slope safety: $S_{slope} = \max\left(0, 1 - \frac{\theta_{slope}}{\theta_{max}}\right) \times 100$.
+4. $S_{elev}$: Elevation advantage relative to regional topographic extrema ($0-100$).
+5. $S_{power}$: Power survival metric: $100\%$ if min SoC remains above safe threshold; penalized proportionally if battery enters critical deficit or depletes ($0-100$).
+6. $S_{blackout}$: Communication blackout risk mitigation: $100\%$ for zero blackout, penalized linearly as continuous blackout approaches threshold ($0-100$).
+
+Hard operational constraints disqualify any site that violates user-configured safety envelopes (minimum illumination, minimum communication, maximum slope, maximum shadow hours, maximum blackout hours, or battery depletion).

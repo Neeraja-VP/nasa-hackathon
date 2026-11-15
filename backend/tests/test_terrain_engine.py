@@ -209,3 +209,52 @@ def test_earth_visibility_classification():
     )
     assert earth_low["link_status"] == "BELOW_MIN_ELEVATION"
     assert earth_low["is_visible"] is False
+
+
+def test_terrain_horizon_provenance_and_metadata():
+    """Verify that TerrainHorizonResponse includes data provenance, DEM resolution, and datum."""
+    req = TerrainHorizonRequest(
+        latitude=-89.78,
+        longitude=125.0,
+        elevation_m=1240.0,
+        max_distance_km=20.0,
+        azimuth_step_deg=10.0,
+        observer_height_m=2.0
+    )
+    res = terrain_engine.generate_horizon_profile(req)
+    assert res.terrain_data_source is not None
+    assert "NASA LOLA" in res.terrain_data_source or "PROCEDURAL" in res.terrain_data_source
+    assert res.dem_resolution_m > 0.0 or res.is_procedural_fallback is True
+    assert "R=1737.4 km" in res.elevation_datum
+
+
+def test_dem_loader_procedural_fallback():
+    """Verify that when no raster DEM is loaded, DemLoader gracefully uses procedural fallback."""
+    from app.services.geospatial.dem_loader import dem_loader
+    original_dataset = dem_loader.active_dataset
+    try:
+        dem_loader.active_dataset = None
+        meta = dem_loader.get_metadata()
+        assert meta["is_procedural_fallback"] is True
+        assert meta["terrain_data_source"] == "PROCEDURAL LOLA TOPOGRAPHY FALLBACK"
+        assert meta["data_quality_warning"] is not None
+        
+        # Test elevation sampling in procedural mode
+        elev = dem_loader.sample_elevation(-89.78, 125.0)
+        assert abs(elev - 1240.0) < 5.0
+    finally:
+        dem_loader.active_dataset = original_dataset
+
+
+def test_dem_loader_geotiff_loading():
+    """Verify loading real LOLA GeoTIFF raster file."""
+    import os
+    from app.services.geospatial.dem_loader import dem_loader
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "datasets", "dem"))
+    tif_path = os.path.join(base_dir, "lola_south_pole_benchmark.tif")
+    if os.path.isfile(tif_path):
+        ds = dem_loader.load_geotiff(tif_path)
+        assert ds.width == 251
+        assert ds.height == 251
+        assert ds.pixel_scale_m == 1200.0
+        assert "TIFF" in ds.product_id

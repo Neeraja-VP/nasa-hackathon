@@ -37,7 +37,18 @@ class EphemerisResponse(BaseModel):
     duration_days: float
     step_hours: float
     total_steps: int
-    data_source: str = "NASA JPL Horizons Web API / DE440 ephemeris"
+    data_source: str = Field(
+        default="ANALYTICAL FALLBACK DATA",
+        description="Identifies the exact provenance: LIVE NASA HORIZONS DATA, CACHED NASA HORIZONS DATA, or ANALYTICAL FALLBACK DATA"
+    )
+    data_source_type: str = Field(
+        default="ANALYTICAL_FALLBACK",
+        description="Type category: LIVE_NASA_HORIZONS, CACHED_NASA_HORIZONS, or ANALYTICAL_FALLBACK"
+    )
+    data_quality_warning: Optional[str] = Field(
+        default=None,
+        description="Warning notice if external data was requested but offline fallback was triggered"
+    )
     time_series: List[EphemerisPoint]
 
 

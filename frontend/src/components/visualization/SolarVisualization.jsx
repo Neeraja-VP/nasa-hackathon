@@ -25,6 +25,7 @@ import {
 import MetricCard from '../common/MetricCard';
 import LoadingState from '../common/LoadingState';
 import ErrorState from '../common/ErrorState';
+import DataSourceBanner from '../common/DataSourceBanner';
 import PolarRadarPlot from '../explorer/PolarRadarPlot';
 import { formatPercent, formatHours, formatDateTime, formatDateShort } from '../../utils/formatters';
 
@@ -68,6 +69,16 @@ export default function SolarVisualization({
 
   return (
     <div className="space-y-6">
+      {/* 0. DATA PROVENANCE & QUALITY TRANSPARENCY BANNER */}
+      <DataSourceBanner
+        ephemerisSource={illuminationData.data_source}
+        ephemerisType={illuminationData.data_source_type}
+        terrainSource={illuminationData.terrain_data_source || terrainHorizonData?.terrain_data_source}
+        demResolutionM={illuminationData.dem_resolution_m || terrainHorizonData?.dem_resolution_m}
+        isProceduralFallback={terrainHorizonData?.is_procedural_fallback}
+        warningMessage={illuminationData.data_quality_warning || terrainHorizonData?.data_quality_warning}
+      />
+
       {/* 1. TOP METRIC GAUGES */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricCard

@@ -75,8 +75,9 @@ All calculations in LUNA NAVIGATOR utilize actual scientific datasets released b
 ```
 datasets/
 ├── dem/
-│   ├── lola_south_pole_100m.tif   # Member 3: Primary regional DEM
-│   └── lola_sites_20m/            # High-resolution crops around candidate sites
+│   ├── lola_south_pole_100m.tif   # Member 3: Primary regional DEM (100 m/px)
+│   ├── lola_south_pole_benchmark.npz # Calibrated benchmark raster (1200 m/px)
+│   └── lola_south_pole_benchmark.tif # Calibrated benchmark GeoTIFF (1200 m/px)
 ├── imagery/
 │   ├── lroc_wac_south_pole.png    # 2D base map tiles
 │   └── shaded_relief/             # Computed hillshade tiles
@@ -86,3 +87,19 @@ datasets/
 └── sample/
     └── candidate_sites.json       # Ground-truth sites catalog
 ```
+
+---
+
+## 6. Scientific Provenance & Transparency Standard
+
+All responses from Luna Navigator clearly specify dataset provenance:
+
+- **Ephemeris Source**:
+  - `LIVE NASA HORIZONS DATA`: Real-time query to NASA JPL Horizons Web API (DE440).
+  - `CACHED NASA HORIZONS DATA`: Cached JPL Horizons results matching site coordinates and mission epoch.
+  - `ANALYTICAL FALLBACK DATA`: Offline analytical model incorporating solar obliquity and lunar libration dynamics.
+- **Terrain Source**:
+  - `NASA LOLA RASTER DEM (product_id, resolution_m/px)`: Real elevation grid sampled via bilinear interpolation.
+  - `PROCEDURAL LOLA TOPOGRAPHY FALLBACK`: Calibrated mathematical geomorphic model used when raster DEM files are absent.
+
+For step-by-step PDS acquisition procedures, refer to [nasa-data-acquisition.md](file:///c:/Users/l/Documents/lunarsite_hackathon/luna-project/docs/nasa-data-acquisition.md).

@@ -64,6 +64,15 @@ def create_application() -> FastAPI:
             "api_endpoints": "/api"
         }
 
+    @app.get("/health", tags=["System"])
+    def root_health():
+        return {
+            "status": "HEALTHY",
+            "service": settings.PROJECT_NAME,
+            "version": settings.VERSION,
+            "environment": settings.ENVIRONMENT
+        }
+
     return app
 
 
