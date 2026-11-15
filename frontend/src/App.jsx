@@ -61,28 +61,6 @@ export default function App() {
         onToggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
       />
 
-      {/* Mobile Tab Navigation Bar */}
-      <div className="lg:hidden flex items-center overflow-x-auto border-b border-luna-800 bg-luna-900/90 px-3 py-2 space-x-2 shrink-0 z-10">
-        {NAVIGATION_TABS.map((tab) => {
-          const Icon = tab.icon;
-          const active = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-1.5 rounded-lg px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors ${
-                active
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                  : 'text-slate-400 hover:text-white bg-luna-950'
-              }`}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
       {/* 2. MAIN APPLICATION WORKSPACE */}
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Backdrop */}
