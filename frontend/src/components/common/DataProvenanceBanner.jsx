@@ -15,7 +15,9 @@ export default function DataProvenanceBanner({
   const isFallback = !isLive && !isCached;
 
   const ephemBadgeVariant = isLive ? 'emerald' : isCached ? 'cyan' : 'amber';
-  const terrainBadgeVariant = terrainSource && terrainSource.includes('PROCEDURAL') ? 'amber' : 'cyan';
+  const isPdsTerrain = terrainSource && (terrainSource.includes('NASA LOLA PDS') || terrainSource.includes('REAL'));
+  const isProceduralTerrain = terrainSource && terrainSource.includes('PROCEDURAL');
+  const terrainBadgeVariant = isPdsTerrain ? 'emerald' : isProceduralTerrain ? 'amber' : 'cyan';
 
   return (
     <div className={`space-y-2.5 ${className}`}>
@@ -37,13 +39,14 @@ export default function DataProvenanceBanner({
             <Layers className="h-3.5 w-3.5 text-purple-400" />
             <span className="uppercase tracking-wider">Terrain:</span>
           </div>
-          <Badge variant={terrainBadgeVariant} size="xs">
-            {terrainSource || 'NASA LOLA DEM'}
+          <Badge variant={terrainBadgeVariant} size="xs" className="font-semibold">
+            {isPdsTerrain && <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 mr-1 inline-block" />}
+            {terrainSource || 'NASA LOLA PDS DATA'}
           </Badge>
 
           {demResolutionM && (
-            <Badge variant="default" size="xs" className="text-slate-400">
-              {demResolutionM}m/px
+            <Badge variant="default" size="xs" className="text-slate-300 font-mono">
+              {demResolutionM} m/px
             </Badge>
           )}
         </div>

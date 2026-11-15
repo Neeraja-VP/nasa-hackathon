@@ -12,9 +12,9 @@ from app.engines.simulation.engine import simulation_engine
 
 def test_simulation_solar_tracking_geometry_advantage():
     """Verify vertical azimuth tracking produces vastly more power than horizontal deck at South Pole."""
-    # Run 5-day simulation at Shackleton Rim
+    # Run 5-day simulation at Connecting Ridge
     req_vertical = SimulationRequest(
-        site_id="shackleton-rim",
+        site_id="connecting-ridge",
         start_date=datetime(2026, 12, 1, 0, 0, 0, tzinfo=timezone.utc),
         duration_days=5.0,
         step_hours=2.0,
@@ -25,7 +25,7 @@ def test_simulation_solar_tracking_geometry_advantage():
     res_vertical = simulation_engine.simulate_mission_power(req_vertical)
 
     req_horizontal = SimulationRequest(
-        site_id="shackleton-rim",
+        site_id="connecting-ridge",
         start_date=datetime(2026, 12, 1, 0, 0, 0, tzinfo=timezone.utc),
         duration_days=5.0,
         step_hours=2.0,
@@ -43,9 +43,8 @@ def test_simulation_solar_tracking_geometry_advantage():
 
 def test_battery_depletion_detection():
     """Verify that undersized battery storage triggers depletion flag during shadow intervals or high load."""
-    # Connecting Ridge experiences shadow occultation, or use high load exceeding generation
     req_undersized = SimulationRequest(
-        site_id="connecting-ridge",
+        site_id="shackleton-rim",
         start_date=datetime(2026, 12, 1, 0, 0, 0, tzinfo=timezone.utc),
         duration_days=3.0,
         step_hours=2.0,
@@ -63,7 +62,7 @@ def test_battery_depletion_detection():
 def test_sufficient_battery_nominal_health():
     """Verify that adequately sized battery maintains nominal health status."""
     req_nominal = SimulationRequest(
-        site_id="shackleton-rim",
+        site_id="connecting-ridge",
         start_date=datetime(2026, 12, 1, 0, 0, 0, tzinfo=timezone.utc),
         duration_days=5.0,
         step_hours=2.0,

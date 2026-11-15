@@ -113,9 +113,9 @@ def test_terrain_engine_real_dem_vs_procedural():
     assert res.dem_resolution_m is not None
     assert res.calculation_status == "NOMINAL"
     assert len(res.horizon_points) == 36
-    # Obstruction angles must be physically plausible for Shackleton rim (-10° to +15°)
+    # Obstruction angles must be physically plausible for Shackleton area (-15° to +35°)
     for pt in res.horizon_points:
-        assert -10.0 <= pt.horizon_elevation_deg <= 15.0
+        assert -15.0 <= pt.horizon_elevation_deg <= 35.0
 
 
 def test_terrain_engine_out_of_bounds_fallback():

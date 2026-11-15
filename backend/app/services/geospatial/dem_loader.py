@@ -71,6 +71,7 @@ CANDIDATE_SITE_BENCHMARKS: Dict[str, Dict[str, float]] = {
 class LolaDemDataset:
     """
     In-memory representation of a LOLA Digital Elevation Model grid.
+    Supports official NASA PDS polar stereographic grids as well as benchmark archives.
     """
     
     def __init__(
@@ -81,7 +82,8 @@ class LolaDemDataset:
         center_pixel_y: float,
         product_id: str = "NASA_LOLA_LDEM_80S",
         datum_radius_m: float = MOON_MEAN_RADIUS_M,
-        projection: Optional[PolarStereographic] = None
+        projection: Optional[PolarStereographic] = None,
+        is_pds_standard: bool = False
     ):
         self.elevation_data = elevation_data.astype(np.float32)
         self.pixel_scale_m = pixel_scale_m
@@ -90,32 +92,49 @@ class LolaDemDataset:
         self.product_id = product_id
         self.datum_radius_m = datum_radius_m
         self.projection = projection or PolarStereographic(radius_m=datum_radius_m)
+        self.is_pds_standard = is_pds_standard
         self.height, self.width = elevation_data.shape
+
+    def latlon_to_pixel(self, lat_deg: float, lon_deg: float) -> Tuple[float, float]:
+        """
+        Convert selenographic (lat, lon) to raster pixel line and sample coordinates.
+        Conforms strictly to NASA PDS3 DSMAP_POLAR specifications for polar stereographic products.
+        """
+        norm_lon = lon_deg % 360.0
+        if self.is_pds_standard:
+            # Official NASA PDS DSMAP_POLAR transformation:
+            # Lon 0° extends straight up (-line), Lon 90°E extends to the right (+sample)
+            colat_half_rad = math.radians(90.0 - abs(lat_deg)) / 2.0
+            rho = 2.0 * self.datum_radius_m * math.tan(colat_half_rad)
+            lon_rad = math.radians(norm_lon)
+            px = self.center_pixel_x + (rho * math.sin(lon_rad)) / self.pixel_scale_m
+            py = self.center_pixel_y - (rho * math.cos(lon_rad)) / self.pixel_scale_m
+            return (px, py)
+        else:
+            return self.projection.latlon_to_pixel(
+                lat_deg=lat_deg,
+                lon_deg=norm_lon,
+                pixel_scale_m=self.pixel_scale_m,
+                center_pixel_x=self.center_pixel_x,
+                center_pixel_y=self.center_pixel_y
+            )
 
     def is_within_bounds(self, lat_deg: float, lon_deg: float) -> bool:
         """
         Check if (lat, lon) falls within the valid raster domain.
         """
-        px, py = self.projection.latlon_to_pixel(
-            lat_deg=lat_deg,
-            lon_deg=lon_deg,
-            pixel_scale_m=self.pixel_scale_m,
-            center_pixel_x=self.center_pixel_x,
-            center_pixel_y=self.center_pixel_y
-        )
+        if self.is_pds_standard:
+            # 80S polar coverage check: lat must be in [-90.0, -80.0]
+            if lat_deg > -79.99 or lat_deg < -90.0:
+                return False
+        px, py = self.latlon_to_pixel(lat_deg, lon_deg)
         return (0 <= px < self.width - 1) and (0 <= py < self.height - 1)
 
     def get_elevation_bilinear(self, lat_deg: float, lon_deg: float) -> float:
         """
         Sample elevation at (lat, lon) with sub-pixel bilinear interpolation.
         """
-        px, py = self.projection.latlon_to_pixel(
-            lat_deg=lat_deg,
-            lon_deg=lon_deg,
-            pixel_scale_m=self.pixel_scale_m,
-            center_pixel_x=self.center_pixel_x,
-            center_pixel_y=self.center_pixel_y
-        )
+        px, py = self.latlon_to_pixel(lat_deg, lon_deg)
         
         # Check bounds
         if px < 0 or px >= self.width - 1 or py < 0 or py >= self.height - 1:
@@ -125,9 +144,9 @@ class LolaDemDataset:
             ])
             
         x0 = int(math.floor(px))
-        x1 = x0 + 1
+        x1 = min(x0 + 1, self.width - 1)
         y0 = int(math.floor(py))
-        y1 = y0 + 1
+        y1 = min(y0 + 1, self.height - 1)
         
         dx = px - x0
         dy = py - y0
@@ -160,15 +179,34 @@ class DemLoader:
     def _load_best_available_dem(self):
         """
         Attempts to load:
-        1. High-resolution LOLA GeoTIFF (e.g. lola_south_pole_100m.tif)
-        2. Real LOLA PDS .img in datasets/dem/ (e.g. ldem_80s_100m.img)
-        3. Verified benchmark tile (.npz)
-        4. Falls back to calibrated analytical LOLA topography model
+        1. Genuine NASA LOLA PDS IMG/LBL (e.g. ldem_80s_80m.img, ldem_80s_100m.img, ldem_85s_20m.img)
+        2. High-resolution LOLA GeoTIFF (e.g. lola_south_pole_100m.tif)
+        3. Verified benchmark NPZ archive (lola_south_pole_benchmark.npz)
+        4. Benchmark GeoTIFF (lola_south_pole_benchmark.tif)
+        5. Falls back to calibrated analytical LOLA topography model
         """
         if not os.path.isdir(self.dem_dir):
             return
 
-        # 1. High-resolution GeoTIFF (if present)
+        # 1. Genuine NASA LOLA PDS IMG/LBL files (Highest Priority)
+        img_candidates = [
+            os.path.join(self.dem_dir, "ldem_80s_80m.img"),
+            os.path.join(self.dem_dir, "LDEM_80S_80M.IMG"),
+            os.path.join(self.dem_dir, "ldem_80s_100m.img"),
+            os.path.join(self.dem_dir, "LDEM_80S_100M.IMG"),
+            os.path.join(self.dem_dir, "ldem_85s_20m.img"),
+            os.path.join(self.dem_dir, "LDEM_85S_20M.IMG")
+        ]
+        for img_path in img_candidates:
+            if os.path.isfile(img_path):
+                try:
+                    self.load_pds_img(img_path)
+                    logger.info(f"Loaded genuine NASA LOLA DEM from PDS IMG: {img_path}")
+                    return
+                except Exception as e:
+                    logger.warning(f"Failed to load PDS IMG ({img_path}): {e}")
+
+        # 2. High-resolution GeoTIFF (if present and non-benchmark)
         highres_tif = os.path.join(self.dem_dir, "lola_south_pole_100m.tif")
         if os.path.isfile(highres_tif):
             try:
@@ -178,26 +216,12 @@ class DemLoader:
             except Exception as e:
                 logger.warning(f"Failed to load highres GeoTIFF DEM ({highres_tif}): {e}")
 
-        # 2. PDS IMG/LBL files
-        img_candidates = [
-            os.path.join(self.dem_dir, "ldem_80s_100m.img"),
-            os.path.join(self.dem_dir, "ldem_85s_20m.img")
-        ]
-        for img_path in img_candidates:
-            if os.path.isfile(img_path):
-                try:
-                    self.load_pds_img(img_path)
-                    logger.info(f"Loaded LOLA DEM from PDS IMG: {img_path}")
-                    return
-                except Exception as e:
-                    logger.warning(f"Failed to load PDS IMG ({img_path}): {e}")
-
-        # 3. Verified benchmark NPZ archive
+        # 3. Verified benchmark NPZ archive (Fallback Tier 2)
         npz_path = os.path.join(self.dem_dir, "lola_south_pole_benchmark.npz")
         if os.path.isfile(npz_path):
             try:
                 self.load_npz(npz_path)
-                logger.info(f"Loaded LOLA DEM from NPZ: {npz_path}")
+                logger.info(f"Loaded LOLA DEM from benchmark NPZ: {npz_path}")
                 return
             except Exception as e:
                 logger.warning(f"Failed to load NPZ DEM: {e}")
@@ -286,20 +310,22 @@ class DemLoader:
     def load_pds_img(self, img_path: str, lbl_path: Optional[str] = None) -> LolaDemDataset:
         """
         Load elevation grid from raw NASA PDS binary image (.img) using detached label (.lbl).
-        Supports NASA LOLA GDR standard formats (16-bit MSB integer or 32-bit floating point).
+        Supports NASA LOLA GDR standard formats (16-bit signed LSB/MSB integer or 32-bit floating point).
         """
         if lbl_path is None:
             lbl_path = os.path.splitext(img_path)[0] + ".lbl"
 
-        lines = 1000
-        line_samples = 1000
-        sample_bits = 32
-        sample_type = "PC_REAL"
-        scaling_factor = 1.0
-        offset = 0.0
-        scale_m = 100.0
-        center_x = 500.0
-        center_y = 500.0
+        lines = 7600
+        line_samples = 7600
+        sample_bits = 16
+        sample_type = "LSB_INTEGER"
+        scaling_factor = 0.5
+        offset = 1737400.0
+        scale_m = 80.0
+        center_x = 3799.5
+        center_y = 3799.5
+        datum_radius_m = MOON_MEAN_RADIUS_M
+        product_id = "NASA_LOLA_LDEM_80S_80M"
 
         if os.path.isfile(lbl_path):
             with open(lbl_path, "r", encoding="utf-8", errors="ignore") as f:
@@ -308,27 +334,43 @@ class DemLoader:
                     parts = [p.strip() for p in line.split("=")]
                     if len(parts) == 2:
                         key, val = parts[0], parts[1]
+                        val = val.split("/*")[0].strip()
                         if key == "LINES":
-                            lines = int(val)
+                            lines = int(val.split()[0])
                         elif key == "LINE_SAMPLES":
-                            line_samples = int(val)
+                            line_samples = int(val.split()[0])
                         elif key == "SAMPLE_BITS":
-                            sample_bits = int(val)
+                            sample_bits = int(val.split()[0])
                         elif key == "SAMPLE_TYPE":
-                            sample_type = val.replace('"', '')
+                            sample_type = val.replace('"', '').strip()
                         elif key == "SCALING_FACTOR":
-                            scaling_factor = float(val)
+                            scaling_factor = float(val.split()[0])
                         elif key == "OFFSET":
-                            offset = float(val)
+                            offset = float(val.split()[0])
                         elif key in ("MAP_SCALE", "MAP_RESOLUTION"):
                             try:
                                 scale_m = float(val.split()[0])
                             except Exception:
                                 pass
                         elif key == "LINE_PROJECTION_OFFSET":
-                            center_y = float(val)
+                            try:
+                                center_y = float(val.split()[0])
+                            except Exception:
+                                pass
                         elif key == "SAMPLE_PROJECTION_OFFSET":
-                            center_x = float(val)
+                            try:
+                                center_x = float(val.split()[0])
+                            except Exception:
+                                pass
+                        elif key in ("A_AXIS_RADIUS", "B_AXIS_RADIUS", "C_AXIS_RADIUS"):
+                            try:
+                                r_val = float(val.split()[0])
+                                if "<km>" in val.lower() or r_val < 10000:
+                                    datum_radius_m = r_val * 1000.0
+                                else:
+                                    datum_radius_m = r_val
+                            except Exception:
+                                pass
 
         # Map dtype
         if sample_bits == 16:
@@ -339,7 +381,7 @@ class DemLoader:
             else:
                 dt = ">i4" if "MSB" in sample_type else "<i4"
         else:
-            dt = "<f4"
+            dt = "<i2"
 
         raw_data = np.fromfile(img_path, dtype=dt)
         if len(raw_data) >= lines * line_samples:
@@ -347,19 +389,31 @@ class DemLoader:
         else:
             raise ValueError(f"PDS file size ({len(raw_data)}) does not match expected {lines}x{line_samples}")
 
-        elevation = elevation * scaling_factor + offset
-        # Replace nodata values (< -10000 or > 20000)
+        # Conversion according to PDS3 DSMAP label:
+        # HEIGHT = (DN * SCALING_FACTOR)
+        # If OFFSET is near planetary radius (~1737400 m), raw value is HEIGHT relative to OFFSET.
+        if offset >= 1000000.0:
+            elevation = elevation * scaling_factor
+        else:
+            elevation = elevation * scaling_factor + offset
+
+        # Replace nodata values (< -12000 or > 25000)
         elevation[elevation < -12000.0] = 0.0
         elevation[elevation > 25000.0] = 0.0
 
-        product_id = f"NASA_LOLA_{os.path.basename(img_path).replace('.img', '').upper()}"
+        if "LDEM_80S_80M" in os.path.basename(img_path).upper():
+            product_id = "NASA_LOLA_LDEM_80S_80M"
+        else:
+            product_id = f"NASA_LOLA_{os.path.basename(img_path).replace('.img', '').upper()}"
 
         dataset = LolaDemDataset(
             elevation_data=elevation,
             pixel_scale_m=scale_m,
             center_pixel_x=center_x,
             center_pixel_y=center_y,
-            product_id=product_id
+            product_id=product_id,
+            datum_radius_m=datum_radius_m,
+            is_pds_standard=True
         )
         self.active_dataset = dataset
         return dataset
@@ -378,7 +432,7 @@ class DemLoader:
         """
         if self.active_dataset is not None:
             is_benchmark = "BENCHMARK" in self.active_dataset.product_id
-            source_label = "CACHED NASA LOLA BENCHMARK DEM" if is_benchmark else "REAL NASA LOLA DEM"
+            source_label = "BENCHMARK DEM DATA" if is_benchmark else "NASA LOLA PDS DATA"
             return {
                 "dem_source": source_label,
                 "product_id": self.active_dataset.product_id,
@@ -386,11 +440,11 @@ class DemLoader:
                 "elevation_unit": "meters",
                 "width": self.active_dataset.width,
                 "height": self.active_dataset.height,
-                "datum": "Mean Lunar Sphere R=1737.4 km (NASA LOLA PDS)",
-                "projection": "South Pole Polar Stereographic (IAU2000:301)"
+                "datum": f"Mean Lunar Sphere R={self.active_dataset.datum_radius_m/1000:.1f} km (NASA LOLA PDS)",
+                "projection": "South Pole Polar Stereographic (IAU2000:301 / DE421)"
             }
         return {
-            "dem_source": "PROCEDURAL LOLA TOPOGRAPHY FALLBACK",
+            "dem_source": "PROCEDURAL FALLBACK DATA",
             "product_id": "CALIBRATED_LOLA_PROCEDURAL_V1",
             "resolution_m": 100.0,
             "elevation_unit": "meters",
@@ -401,10 +455,18 @@ class DemLoader:
     def sample_elevation(self, lat_deg: float, lon_deg: float) -> float:
         """
         Sample elevation in meters relative to lunar datum sphere R=1737.4 km.
-        Uses real DEM raster interpolation when point is within raster domain,
-        anchors known candidate landing sites, and falls back to calibrated regional topography.
+        Priority:
+        1. Genuine NASA LOLA PDS DEM raster sampling (bilinear interpolation).
+        2. Benchmark DEM raster sampling / anchor elevations.
+        3. Calibrated procedural regional topography fallback.
         """
-        # Exact site coordinate anchor (< 250 m from benchmark coordinates)
+        # 1. Genuine NASA LOLA DEM raster sampling (Highest Priority)
+        if self.active_dataset is not None and "BENCHMARK" not in self.active_dataset.product_id:
+            if self.active_dataset.is_within_bounds(lat_deg, lon_deg):
+                val = self.active_dataset.get_elevation_bilinear(lat_deg, lon_deg)
+                return float(round(val, 2))
+
+        # 2. Benchmark anchor (< 250 m from benchmark coordinates) when using benchmark dataset
         proj = PolarStereographic()
         x_obs, y_obs = proj.forward(lat_deg, lon_deg)
         for site_id, site in CANDIDATE_SITE_BENCHMARKS.items():
@@ -412,12 +474,13 @@ class DemLoader:
             if math.hypot(x_obs - x_site, y_obs - y_site) < 250.0:
                 return float(site["elevation_m"])
 
-        # Check active DEM dataset
+        # 3. Benchmark DEM dataset sampling (if active)
         if self.active_dataset is not None:
             if self.active_dataset.is_within_bounds(lat_deg, lon_deg):
                 val = self.active_dataset.get_elevation_bilinear(lat_deg, lon_deg)
                 return float(round(val, 2))
 
+        # 4. Calibrated procedural fallback
         return self.calibrated_lola_elevation(lat_deg, lon_deg)
 
     def calibrated_lola_elevation(self, lat_deg: float, lon_deg: float) -> float:
@@ -489,13 +552,16 @@ class DemLoader:
     def calculate_surface_slope_deg(self, lat_deg: float, lon_deg: float, delta_m: float = 100.0) -> float:
         """
         Calculate local terrain slope angle (in degrees) using central differences.
+        Uses real NASA LOLA DEM elevation sampling when active, bypassing hardcoded benchmark anchors.
         """
-        proj = PolarStereographic()
-        x_obs, y_obs = proj.forward(lat_deg, lon_deg)
-        for site_id, site in CANDIDATE_SITE_BENCHMARKS.items():
-            x_site, y_site = proj.forward(site["latitude"], site["longitude"])
-            if math.hypot(x_obs - x_site, y_obs - y_site) < 300.0:
-                return float(site["slope_degrees"])
+        # Only check benchmark slope anchors when benchmark mode is active
+        if self.active_dataset is None or "BENCHMARK" in self.active_dataset.product_id:
+            proj = PolarStereographic()
+            x_obs, y_obs = proj.forward(lat_deg, lon_deg)
+            for site_id, site in CANDIDATE_SITE_BENCHMARKS.items():
+                x_site, y_site = proj.forward(site["latitude"], site["longitude"])
+                if math.hypot(x_obs - x_site, y_obs - y_site) < 300.0:
+                    return float(site["slope_degrees"])
 
         lat_e, lon_e = forward_geodesic(lat_deg, lon_deg, 90.0, delta_m)
         lat_w, lon_w = forward_geodesic(lat_deg, lon_deg, 270.0, delta_m)

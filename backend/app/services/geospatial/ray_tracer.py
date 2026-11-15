@@ -94,7 +94,7 @@ class LolaRayTracer:
         self,
         lat_deg: float,
         lon_deg: float,
-        elevation_m: float,
+        elevation_m: Optional[float] = None,
         observer_height_m: float = 2.0,
         max_distance_km: float = 60.0,
         azimuth_step_deg: float = 1.0
@@ -105,7 +105,7 @@ class LolaRayTracer:
         Args:
             lat_deg: Observer latitude
             lon_deg: Observer longitude
-            elevation_m: Ground elevation in meters
+            elevation_m: Ground elevation in meters (if None, sampled from active DEM)
             observer_height_m: Mast/antenna instrument height in meters
             max_distance_km: Maximum radial search radius in km
             azimuth_step_deg: Azimuth sampling resolution step in degrees
@@ -113,7 +113,14 @@ class LolaRayTracer:
         Returns:
             List of HorizonPoint objects ordered from azimuth 0.0° to 359.0°
         """
-        total_obs_elevation = elevation_m + observer_height_m
+        # Ground elevation: anchor to the active DEM surface at (lat_deg, lon_deg)
+        # to ensure ray tracing originates from the actual topography rather than nominal approximations.
+        if self.dem_loader:
+            ground_elev = self.dem_loader.sample_elevation(lat_deg, lon_deg)
+        else:
+            ground_elev = elevation_m if elevation_m is not None else 0.0
+
+        total_obs_elevation = ground_elev + observer_height_m
         max_dist_m = max_distance_km * 1000.0
         
         # Determine radial step based on resolution

@@ -725,8 +725,8 @@ export default function SkyHorizonView({
       {/* 0. DATA PROVENANCE BANNER */}
       <DataProvenanceBanner
         ephemerisSource={illuminationData?.ephemeris_source || 'NASA JPL HORIZONS'}
-        terrainSource={terrainHorizonData?.terrain_source || 'NASA LOLA DEM (LDEM_80S_100M)'}
-        demResolutionM={terrainHorizonData?.dem_resolution_m || 100.0}
+        terrainSource={terrainHorizonData?.terrain_source || 'NASA LOLA PDS DATA'}
+        demResolutionM={terrainHorizonData?.dem_resolution_m || 80.0}
         calculationStatus={terrainHorizonData?.calculation_status || 'NOMINAL'}
         dataQualityWarning={illuminationData?.data_quality_warning}
       />

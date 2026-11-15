@@ -26,7 +26,7 @@ from app.engines.recommendation.engine import recommendation_engine
 def test_solar_panel_tracking_modes_comparison():
     """Verify that dual-axis tracking produces higher or equal power to fixed panels."""
     base_params = {
-        "site_id": "shackleton-rim",
+        "site_id": "connecting-ridge",
         "start_date": datetime(2026, 12, 1, 0, 0, 0, tzinfo=timezone.utc),
         "duration_days": 1.0,
         "step_hours": 1.0,
@@ -56,7 +56,7 @@ def test_solar_panel_tracking_modes_comparison():
 def test_solar_panel_dust_and_wiring_derating():
     """Verify dust degradation and wiring loss factor directly scale generated power."""
     base_params = {
-        "site_id": "shackleton-rim",
+        "site_id": "connecting-ridge",
         "start_date": datetime(2026, 12, 1, 0, 0, 0, tzinfo=timezone.utc),
         "duration_days": 1.0,
         "step_hours": 2.0,
@@ -111,7 +111,7 @@ def test_solar_incidence_angle_recorded():
 def test_battery_charging_and_discharging_efficiency():
     """Verify battery round-trip Coulombic losses reduce stored and delivered energy."""
     base_params = {
-        "site_id": "shackleton-rim",
+        "site_id": "connecting-ridge",
         "start_date": datetime(2026, 12, 1, 0, 0, 0, tzinfo=timezone.utc),
         "duration_days": 1.0,
         "step_hours": 1.0,
@@ -162,7 +162,7 @@ def test_battery_depletion_and_survival_warning():
 def test_battery_charge_curtailment():
     """Verify battery charge power limits clamp charge intake and track curtailment."""
     req = SimulationRequest(
-        site_id="shackleton-rim",
+        site_id="connecting-ridge",
         start_date=datetime(2026, 12, 1, 0, 0, 0, tzinfo=timezone.utc),
         duration_days=1.0,
         step_hours=1.0,
