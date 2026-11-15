@@ -12,8 +12,10 @@ import PowerSimulation from './components/simulation/PowerSimulation';
 import AIMissionAssistant from './components/assistant/AIMissionAssistant';
 import MoonSurface3D from './components/visualization/MoonSurface3D';
 import LROCQuickMapViewer from './components/visualization/LROCQuickMapViewer';
+import SkyHorizonView from './components/visualization/SkyHorizonView';
 import LoadingState from './components/common/LoadingState';
 import ErrorState from './components/common/ErrorState';
+import CustomSiteModal from './components/sites/CustomSiteModal';
 import { useSites } from './hooks/useSites';
 import { useSiteAnalysis } from './hooks/useSiteAnalysis';
 import { DEFAULT_MISSION_CONFIG } from './utils/constants';
@@ -22,6 +24,7 @@ export default function App() {
   // Navigation State
   const [activeTab, setActiveTab] = useState('overview');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [customSiteModalOpen, setCustomSiteModalOpen] = useState(false);
 
   // Global Mission Parameters
   const [missionConfig, setMissionConfig] = useState(DEFAULT_MISSION_CONFIG);
@@ -36,6 +39,7 @@ export default function App() {
     error: sitesError,
     apiOnline,
     refetch: refetchSites,
+    addCustomSite,
   } = useSites();
 
   // Active Site Orbital & Terrain Analysis hook
@@ -55,6 +59,7 @@ export default function App() {
         onTabChange={setActiveTab}
         apiOnline={apiOnline}
         selectedSite={selectedSite}
+        ephemerisSource={illuminationData?.ephemeris_source || communicationData?.ephemeris_source}
         sidebarOpen={mobileSidebarOpen}
         onToggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
       />
@@ -101,6 +106,7 @@ export default function App() {
           loading={sitesLoading}
           isOpen={mobileSidebarOpen}
           onCloseMobile={() => setMobileSidebarOpen(false)}
+          onOpenCustomSiteModal={() => setCustomSiteModalOpen(true)}
         />
 
         {/* MAIN ANALYSIS CANVAS */}
@@ -171,6 +177,20 @@ export default function App() {
             </div>
           )}
 
+          {/* VIEW: 2.9 COMBINED SKY HORIZON VIEW */}
+          {!sitesLoading && sites.length > 0 && activeTab === 'skyhorizon' && (
+            <SkyHorizonView
+              selectedSite={selectedSite}
+              illuminationData={illuminationData}
+              communicationData={communicationData}
+              terrainHorizonData={terrainHorizonData}
+              loading={analysisLoading}
+              error={analysisError}
+              onRetry={() => {}}
+              missionConfig={missionConfig}
+            />
+          )}
+
           {/* VIEW: 3. SOLAR ILLUMINATION */}
           {!sitesLoading && sites.length > 0 && activeTab === 'illumination' && (
             <SolarVisualization
@@ -179,6 +199,7 @@ export default function App() {
               loading={analysisLoading}
               error={analysisError}
               onRetry={() => {}}
+              onNavigateTab={setActiveTab}
             />
           )}
 
@@ -190,6 +211,7 @@ export default function App() {
               loading={analysisLoading}
               error={analysisError}
               onRetry={() => {}}
+              onNavigateTab={setActiveTab}
             />
           )}
 
@@ -200,6 +222,7 @@ export default function App() {
               loading={analysisLoading}
               error={analysisError}
               onRetry={() => {}}
+              onNavigateTab={setActiveTab}
             />
           )}
 
@@ -243,6 +266,13 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* Global Custom Landing Site Modal */}
+      <CustomSiteModal
+        isOpen={customSiteModalOpen}
+        onClose={() => setCustomSiteModalOpen(false)}
+        onSiteCreated={addCustomSite}
+      />
     </div>
   );
 }

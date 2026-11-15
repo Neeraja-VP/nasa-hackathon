@@ -4,7 +4,7 @@ Integration Tests for FastAPI Endpoints and Calculations
 
 from datetime import datetime, timezone
 import pytest
-from fastapi.testclient import TestClient
+from fastapi_client import FastAPITestClient as TestClient
 from app.main import app
 
 client = TestClient(app)

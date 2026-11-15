@@ -30,7 +30,12 @@ from app.schemas.ephemeris import (
     EphemerisValidationResponse,
     EphemerisValidationResiduals
 )
-from app.services.horizons_client import horizons_client
+from app.services.horizons_client import (
+    horizons_client,
+    SOURCE_LIVE_HORIZONS,
+    SOURCE_CACHED_HORIZONS,
+    SOURCE_ANALYTICAL_FALLBACK
+)
 from app.services.horizons_benchmarks import get_horizons_benchmark
 
 
@@ -163,42 +168,86 @@ class EphemerisEngine:
         """
         Generate time-series of Sun and Earth topocentric positions for the given request.
         Adheres to docs/api-contracts.md Section 2.
+        Integrates actual JPL Horizons observational data when available (live or cached),
+        with transparent fallback to the validated DE440 analytical engine.
         """
         start = request.start_date
         if start.tzinfo is None:
             start = start.replace(tzinfo=timezone.utc)
 
-        data_source = "NASA JPL Horizons Web API / DE440 ephemeris"
+        data_source = SOURCE_ANALYTICAL_FALLBACK
+        calculation_status = "FALLBACK_APPLIED"
+        data_quality_warning = "Using validated analytical DE440 ephemeris model. For real-time JPL Horizons observational data, enable live queries."
 
-        # If live Horizons query was explicitly requested, attempt to query
-        if request.use_live_horizons:
-            stop_time = start + timedelta(days=request.duration_days)
-            live_sun = horizons_client.query_live_horizons(
-                target_id="10",
-                lat=request.latitude,
-                lon=request.longitude,
-                elev_m=request.elevation_m,
-                start_date=start,
-                stop_date=stop_time,
-                step_hours=request.step_hours
-            )
-            if live_sun:
-                data_source = "NASA JPL Horizons Web API (Live DE440/LE440)"
+        stop_time = start + timedelta(days=request.duration_days)
+
+        # 1. Query Horizons for Sun and Earth
+        sun_records, sun_source = horizons_client.query_ephemeris(
+            target_id="10",
+            lat=request.latitude,
+            lon=request.longitude,
+            elev_m=request.elevation_m,
+            start_date=start,
+            stop_date=stop_time,
+            step_hours=request.step_hours,
+            allow_network=request.use_live_horizons
+        )
+        earth_records, earth_source = horizons_client.query_ephemeris(
+            target_id="399",
+            lat=request.latitude,
+            lon=request.longitude,
+            elev_m=request.elevation_m,
+            start_date=start,
+            stop_date=stop_time,
+            step_hours=request.step_hours,
+            allow_network=request.use_live_horizons
+        )
 
         time_series: List[EphemerisPoint] = []
-        total_hours = request.duration_days * 24.0
-        current_hour = 0.0
 
-        while current_hour <= total_hours + 1e-5:
-            current_time = start + timedelta(hours=current_hour)
-            point = self.calculate_ephemeris_point(
-                epoch=current_time,
-                latitude=request.latitude,
-                longitude=request.longitude,
-                elevation_m=request.elevation_m
-            )
-            time_series.append(point)
-            current_hour += request.step_hours
+        if sun_records and earth_records and len(sun_records) > 0 and len(earth_records) > 0:
+            # Successfully obtained actual NASA JPL Horizons observational data
+            if sun_source == SOURCE_LIVE_HORIZONS or earth_source == SOURCE_LIVE_HORIZONS:
+                data_source = SOURCE_LIVE_HORIZONS
+            else:
+                data_source = SOURCE_CACHED_HORIZONS
+
+            calculation_status = "NOMINAL"
+            data_quality_warning = None
+
+            min_len = min(len(sun_records), len(earth_records))
+            for i in range(min_len):
+                current_time = start + timedelta(hours=i * request.step_hours)
+                s_rec = sun_records[i]
+                e_rec = earth_records[i]
+                se_lat, se_lon, _ = self.calculate_sub_earth_point(current_time)
+
+                time_series.append(EphemerisPoint(
+                    timestamp=current_time,
+                    sun_azimuth_deg=round(s_rec["azimuth_deg"], 2),
+                    sun_elevation_deg=round(s_rec["elevation_deg"], 2),
+                    sun_distance_km=round(s_rec["distance_km"], 1),
+                    earth_azimuth_deg=round(e_rec["azimuth_deg"], 2),
+                    earth_elevation_deg=round(e_rec["elevation_deg"], 2),
+                    earth_distance_km=round(e_rec["distance_km"], 1),
+                    sub_earth_longitude_deg=round(se_lon, 2),
+                    sub_earth_latitude_deg=round(se_lat, 2)
+                ))
+        else:
+            # Analytical fallback
+            total_hours = request.duration_days * 24.0
+            current_hour = 0.0
+
+            while current_hour <= total_hours + 1e-5:
+                current_time = start + timedelta(hours=current_hour)
+                point = self.calculate_ephemeris_point(
+                    epoch=current_time,
+                    latitude=request.latitude,
+                    longitude=request.longitude,
+                    elevation_m=request.elevation_m
+                )
+                time_series.append(point)
+                current_hour += request.step_hours
 
         return EphemerisResponse(
             site_coordinates=request,
@@ -207,6 +256,9 @@ class EphemerisEngine:
             step_hours=request.step_hours,
             total_steps=len(time_series),
             data_source=data_source,
+            ephemeris_source=data_source,
+            calculation_status=calculation_status,
+            data_quality_warning=data_quality_warning,
             time_series=time_series
         )
 

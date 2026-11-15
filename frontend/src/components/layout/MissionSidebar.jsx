@@ -23,6 +23,7 @@ export default function MissionSidebar({
   loading,
   isOpen,
   onCloseMobile,
+  onOpenCustomSiteModal,
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRegion, setFilterRegion] = useState('all');
@@ -142,6 +143,20 @@ export default function MissionSidebar({
                 className="h-4 w-4 rounded border-luna-700 bg-luna-950 text-cyan-500 focus:ring-cyan-500 cursor-pointer"
               />
             </div>
+
+            <div className="pt-2 border-t border-luna-800/80 flex items-center justify-between">
+              <div>
+                <span className="text-slate-300 text-xs block">Live NASA Horizons</span>
+                <span className="text-[10px] text-slate-500 font-mono">SSD DE440 ephemeris</span>
+              </div>
+              <input
+                type="checkbox"
+                checked={missionConfig.useLiveHorizons || false}
+                onChange={(e) => onChangeMissionConfig({ ...missionConfig, useLiveHorizons: e.target.checked })}
+                className="h-4 w-4 rounded border-luna-700 bg-luna-950 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                title="Query live NASA JPL Horizons Web API (requires internet)"
+              />
+            </div>
           </div>
         )}
       </div>
@@ -152,7 +167,19 @@ export default function MissionSidebar({
           <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
             Candidate Sites ({filteredSites.length})
           </h3>
-          {loading && <span className="font-mono text-[10px] text-cyan-400 animate-pulse">Scanning...</span>}
+          <div className="flex items-center space-x-2">
+            {onOpenCustomSiteModal && (
+              <button
+                type="button"
+                onClick={onOpenCustomSiteModal}
+                className="text-[10px] font-mono text-cyan-400 hover:text-cyan-300 font-semibold px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-800/80 transition-colors"
+                title="Register custom lunar landing coordinates"
+              >
+                + Custom
+              </button>
+            )}
+            {loading && <span className="font-mono text-[10px] text-cyan-400 animate-pulse">Scanning...</span>}
+          </div>
         </div>
 
         {/* Search Input */}

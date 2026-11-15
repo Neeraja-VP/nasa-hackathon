@@ -10,6 +10,7 @@ export const DEFAULT_MISSION_CONFIG = {
   mastHeightM: 2.0,
   minCommElevationDeg: 0.5,
   antennaHeightM: 2.5,
+  useLiveHorizons: false,
 };
 
 export const DEFAULT_MCDA_WEIGHTS = {
@@ -17,6 +18,8 @@ export const DEFAULT_MCDA_WEIGHTS = {
   earth_communication: 0.30,
   slope_safety: 0.20,
   elevation_advantage: 0.15,
+  power_survival: 0.0,
+  blackout_risk: 0.0,
 };
 
 export const DEFAULT_CONSTRAINTS = {
@@ -24,15 +27,25 @@ export const DEFAULT_CONSTRAINTS = {
   min_communication_percentage: 30.0,
   max_acceptable_slope_degrees: 12.0,
   max_continuous_shadow_hours: 80.0,
+  min_battery_soc_percent: 20.0,
+  max_comm_blackout_hours: 48.0,
 };
 
 export const DEFAULT_SIMULATION_CONFIG = {
   solar_array_area_m2: 4.5,
   solar_efficiency: 0.30,
   solar_tracking_type: 'VERTICAL_AZIMUTH_TRACKING',
+  panel_tilt_deg: 90.0,
+  panel_azimuth_deg: 0.0,
+  dust_degradation_factor: 0.98,
+  wiring_loss_factor: 0.97,
   battery_capacity_wh: 5000.0,
   initial_battery_soc_percent: 100.0,
   min_safe_soc_percent: 20.0,
+  charging_efficiency: 0.94,
+  discharging_efficiency: 0.95,
+  max_charge_power_w: 1000.0,
+  max_discharge_power_w: 1500.0,
   base_hotel_load_w: 150.0,
   payload_active_load_w: 100.0,
   survival_heater_load_w: 80.0,
@@ -82,19 +95,23 @@ export const SIMULATION_PRESETS = {
 export const MCDA_WEIGHT_PRESETS = {
   balanced: {
     name: 'Balanced Exploration',
-    weights: { solar_illumination: 0.35, earth_communication: 0.30, slope_safety: 0.20, elevation_advantage: 0.15 },
+    weights: { solar_illumination: 0.35, earth_communication: 0.30, slope_safety: 0.20, elevation_advantage: 0.15, power_survival: 0.0, blackout_risk: 0.0 },
   },
   solar_priority: {
     name: 'Maximum Solar Power',
-    weights: { solar_illumination: 0.55, earth_communication: 0.15, slope_safety: 0.20, elevation_advantage: 0.10 },
+    weights: { solar_illumination: 0.50, earth_communication: 0.15, slope_safety: 0.15, elevation_advantage: 0.10, power_survival: 0.10, blackout_risk: 0.0 },
   },
   comm_priority: {
     name: 'Telecom / Relay Outpost',
-    weights: { solar_illumination: 0.20, earth_communication: 0.55, slope_safety: 0.15, elevation_advantage: 0.10 },
+    weights: { solar_illumination: 0.15, earth_communication: 0.45, slope_safety: 0.15, elevation_advantage: 0.10, power_survival: 0.05, blackout_risk: 0.10 },
+  },
+  power_survival: {
+    name: 'Long-Duration EPS Survival',
+    weights: { solar_illumination: 0.25, earth_communication: 0.15, slope_safety: 0.15, elevation_advantage: 0.05, power_survival: 0.30, blackout_risk: 0.10 },
   },
   safety_first: {
     name: 'Lander Touchdown Safety',
-    weights: { solar_illumination: 0.25, earth_communication: 0.20, slope_safety: 0.45, elevation_advantage: 0.10 },
+    weights: { solar_illumination: 0.20, earth_communication: 0.20, slope_safety: 0.40, elevation_advantage: 0.10, power_survival: 0.05, blackout_risk: 0.05 },
   },
 };
 

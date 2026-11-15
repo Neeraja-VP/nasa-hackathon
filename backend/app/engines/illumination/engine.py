@@ -30,7 +30,8 @@ class IlluminationEngine:
             elevation_m=request.elevation_m,
             start_date=request.start_date,
             duration_days=request.duration_days,
-            step_hours=request.step_hours
+            step_hours=request.step_hours,
+            use_live_horizons=getattr(request, "use_live_horizons", False)
         )
         eph_res = ephemeris_engine.calculate_ephemeris_series(eph_req)
         
@@ -103,6 +104,12 @@ class IlluminationEngine:
         total_sunlit_hours = round(sunlit_count * request.step_hours, 1)
         total_shadow_hours = round((total_steps - sunlit_count) * request.step_hours, 1)
         
+        ephem_source = eph_res.data_source
+        terr_source = terrain_horizon.terrain_source if terrain_horizon else "GEOMETRIC HORIZON (NO TERRAIN)"
+        dem_res = terrain_horizon.dem_resolution_m if terrain_horizon else None
+        calc_status = eph_res.calculation_status
+        warning = eph_res.data_quality_warning
+
         return IlluminationResponse(
             latitude=request.latitude,
             longitude=request.longitude,
@@ -114,6 +121,11 @@ class IlluminationEngine:
             total_shadow_hours=total_shadow_hours,
             longest_continuous_sunlight_hours=round(max_sunlit_run, 1),
             longest_continuous_shadow_hours=round(max_shadow_run, 1),
+            ephemeris_source=ephem_source,
+            terrain_source=terr_source,
+            dem_resolution_m=dem_res,
+            calculation_status=calc_status,
+            data_quality_warning=warning,
             time_series=time_series
         )
 

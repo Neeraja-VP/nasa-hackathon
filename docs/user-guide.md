@@ -107,6 +107,15 @@ The left sidebar controls all global inputs across the entire application:
   6. **Nobile Rim 1 (VIPER Site)** (Rolling hills, $-85.25^\circ$, $430\text{ m}$)
   7. **Amundsen Crater Rim** (Basin rim, $-84.45^\circ$, $1680\text{ m}$)
   8. **Leibnitz Plateau** (SPA basin margin, $-85.40^\circ$, $2890\text{ m}$)
+* **Custom Landing Coordinates (`+ Custom` Button)**:
+  Mission planners can define arbitrary landing coordinates across the lunar surface:
+  - Click the **`+ Custom`** button in the Candidate Sites list header.
+  - Enter a descriptive **Site Name** (e.g., "Nobile Rim Ridge West").
+  - Enter **Lunar Latitude** ($-90^\circ$ to $+90^\circ$; inputs $\le -80^\circ$ are highlighted with a South Polar Circle badge).
+  - Enter **Lunar Longitude** ($-180^\circ$ to $+360^\circ$).
+  - Enter optional **Landing Elevation** in meters. If left blank, the backend queries the NASA LOLA Digital Elevation Model (DEM) polar stereographic grid at the target coordinates to automatically sample surface elevation and local terrain slope.
+  - Set optional **Observer Mast Height** in meters (defaults to 2.0 m).
+  - The custom site is instantly validated, registered, and added to the candidate sites selector. It becomes selectable across all 11 analysis views and multi-scenario comparisons.
 
 ---
 
@@ -189,6 +198,56 @@ The left sidebar controls all global inputs across the entire application:
 
 ---
 
+### 3.4.1 Interactive Combined Local Sky-Horizon Simulator
+* **Access Tab**: Click **`Sky Horizon`** (also accessible via direct button from Solar, Earth Comm, and Terrain tabs)
+* **Purpose**: Interactive topocentric celestial simulator displaying the Sun and Earth simultaneously relative to the selected lunar landing site's actual NASA LOLA DEM 360-degree terrain horizon.
+* **Key Features**:
+  * **360° Circular Celestial Horizon Polar Radar**:
+    * Concentric elevation rings from $-1.5^\circ$ to $+10.0^\circ$ centered on zenith.
+    * 8 Cardinal and intercardinal compass directions ($N = 0^\circ, E = 90^\circ, S = 180^\circ, W = 270^\circ$).
+    * **Variable LOLA Terrain Horizon Boundary**: Renders the ray-traced elevation mask as an authentic variable boundary (crimson ridge line with dark volcanic obstruction shading).
+    * **0° Geometric Horizon**: Dotted blue reference circle clearly distinguishing the local tangent plane from topographic massifs.
+    * **Simultaneous Sun & Earth Markers**:
+      - ☀️ **Sun**: Golden orb with radiant corona when unshadowed; dimmed brown core with crossed-out red slash when terrain-occulted.
+      - 🌍 **Earth**: Blue ocean orb with pulsing radio arcs when Direct-to-Earth line of sight exists; dark red blocked indicator when occulted by crater rims.
+    * Sightline rays from central observer (lander mast) to both celestial bodies with live clearance angles.
+    * Interactive cursor hover: calculates mouse azimuth angle, displays exact terrain obstruction angle, distance to blocking peak, and feature name.
+  * **Linear 360° Panoramic Horizon Strip**:
+    * Unwrapped $0^\circ \to 360^\circ$ panoramic horizon elevation profile.
+    * Current Sun and Earth positions plotted with elevation clearance relative to the terrain ridge.
+  * **Synchronized 3D Lunar Surface & Celestial Vectors (Three.js)**:
+    * High-performance WebGL scene of the landing site topography.
+    * Detailed lander model with solar mast and high-gain antenna dish.
+    * **Real-time Directional Sunlight Ray**: Directional light positioned dynamically at $(az_\odot, el_\odot)$, casting real-time dynamic shadows across lunar craters and ridges as the timeline is scrubbed!
+    * **Real-time Earth Direction Vector**: Cyan sightline pointing to a 3D Earth globe in the lunar sky at $(az_\oplus, el_\oplus)$ (turns red dashed when occulted).
+  * **Interactive Time Transport Controls**:
+    * Play/Pause toggle with smooth automated animation.
+    * Timeline slider scrubbing through all mission time steps without triggering expensive API requests.
+    * Step backward (`⏮`), step forward (`⏭`), and reset to mission start (`↺`).
+    * Speed control selector ($1\times, 2\times, 5\times, 10\times, 25\times$).
+    * Live UTC timestamp and mission elapsed time display (`T+00d 04h:00m`).
+  * **Sun Visibility & Transition Dossier**:
+    * Solar azimuth, elevation, terrain mask, and clearance angle ($\Delta el$).
+    * Visibility classification: `DIRECT SUNLIGHT` vs `TERRAIN SHADOWED`.
+    * **Polar Grazing Transition Prediction**:
+      - Time remaining until next terrain shadow ingress ("sunset" equivalent).
+      - Time remaining until next terrain shadow egress ("sunrise" equivalent).
+      - Exact transition timestamp (UTC).
+    * Total sunlight hours remaining in the mission and remaining percentage.
+    * Scientific polar grazing explanation note.
+  * **Earth Visibility & Libration Dossier**:
+    * Earth azimuth, elevation, terrain mask, and clearance angle.
+    * Link status: `DIRECT LINE OF SIGHT` vs `TERRAIN BLOCKED` vs `BELOW MIN ELEVATION`.
+    * Apparent angular diameter ($\approx 1.88^\circ - 1.95^\circ$, ~4x larger than the Sun).
+    * **Libration Ingress/Egress Transition Prediction**:
+      - Time remaining until Earthset (occultation by terrain).
+      - Time remaining until Earthrise (direct link re-acquisition).
+      - Exact transition timestamp (UTC).
+    * Total Direct-to-Earth visibility duration remaining in the mission.
+  * **Comprehensive Legend**: Explains Sun, Earth, Terrain Horizon, Geometric Horizon, Visible Region, and Obstructed Region.
+
+---
+
 ### 3.5 Solar Illumination & Shadow Analysis
 * **Access Tab**: Click **`Solar Illumination`**
 * **Purpose**: Evaluate topocentric solar availability, solar elevation angle, and terrain-cast shadow intervals.
@@ -203,17 +262,26 @@ The left sidebar controls all global inputs across the entire application:
 
 ---
 
-### 3.6 Earth Communication (DTE) & Libration
+### 3.6 Earth Communication (DTE), Libration & RF Link Budget
 * **Access Tab**: Click **`Earth Comm (DTE)`**
-* **Purpose**: Track Direct-to-Earth (DTE) radio contact and blackout intervals driven by lunar orbital libration.
+* **Purpose**: Track Direct-to-Earth (DTE) radio contact, blackout intervals driven by lunar orbital libration, antenna gimbal restrictions, and physical RF link closure.
 * **Key Features**:
   * **Libration Dynamics**: Tracks Earth's apparent oscillation in the lunar sky through $\pm 6.7^\circ$ in latitude and $\pm 7.9^\circ$ in longitude.
-  * **Earth Elevation vs Local Horizon Mask**: Displays when the Earth center dips below local ridges or below the operational minimum communication threshold (e.g. $0.5^\circ$ or $1.0^\circ$).
-  * **Link Status Timeline**:
-    * `DIRECT_LINE_OF_SIGHT` (Green): Unimpeded radio frequency telemetry to the NASA Deep Space Network (DSN).
-    * `TERRAIN_BLOCKED` (Rose): Signal blocked by local topographic massifs or crater rim crests.
-    * `BELOW_MIN_ELEVATION` (Amber): Line-of-sight exists but falls below the antenna elevation cutoff.
-  * **Earth Apparent Angular Diameter**: Displays the apparent size of Earth in the lunar sky ($\sim 1.9^\circ$).
+  * **Earth Elevation vs Local Horizon Mask**: Displays when the Earth center dips below local ridges or below the operational minimum communication threshold (e.g. $0.5^\circ$).
+  * **Antenna Gimbal Boundaries**: Enforces minimum/maximum antenna elevation angles and 360° azimuth slewing limits (`OUTSIDE_ANTENNA_GIMBAL`).
+  * **DSN RF Link Budget Assessment**:
+    * Physics-grounded Friis transmission equation computing Free Space Path Loss (FSPL $\sim 222\text{ dB}$ at X-band 8.45 GHz over $\sim 384,400\text{ km}$).
+    * Incorporates Transmitter Power ($P_{\text{tx}}$ W), Transmitter Antenna Gain ($G_{\text{tx}}$ dBi), DSN 34-meter Receiver Antenna Gain ($G_{\text{rx}} = 68.0\text{ dBi}$), system losses, and Deep Space Network receiver noise spectral density ($N_0 = k T_{\text{sys}} \approx -207.3\text{ dBW/Hz}$ at $T_{\text{sys}} = 135\text{ K}$).
+    * Separates geometric line-of-sight from actual RF link closure: a link is only deemed feasible when Link Margin $\ge 3.0\text{ dB}$.
+  * **Discrete Scheduled Communication Windows**:
+    * Tabulates individual ground station tracking passes (`comm_windows`): window start/end UTC, duration (hours), mean Earth elevation, and mean RF link margin.
+    * Real-time countdown to next available downlink window.
+  * **Link Status Timeline Bar**:
+    * `DIRECT_LINE_OF_SIGHT` (Cyan): Unimpeded radio frequency telemetry to the NASA Deep Space Network with margin $\ge 3.0\text{ dB}$.
+    * `INSUFFICIENT_LINK_MARGIN` (Purple): Earth is geometrically visible, but low transmitter power or excessive data rate causes link margin to drop below $3.0\text{ dB}$.
+    * `OUTSIDE_ANTENNA_GIMBAL` (Amber): Target azimuth or elevation lies outside the lander gimbal envelope.
+    * `TERRAIN_BLOCKED` (Rose): Signal occulted by local topographic massifs or crater rim crests.
+    * `BELOW_MIN_ELEVATION` (Slate): Earth elevation falls below the minimum horizon clearance threshold.
 
 ---
 
@@ -232,40 +300,65 @@ The left sidebar controls all global inputs across the entire application:
 
 ---
 
-### 3.8 Multi-Site Comparison Matrix
+### 3.8 Advanced Multi-Scenario Comparison System
 * **Access Tab**: Click **`Compare Sites`**
-* **Purpose**: Side-by-side comparative trade matrix of candidate sites over the active mission epoch.
-* **Key Features**:
-  * **Multi-Parameter Table**: Compares candidate sites across:
-    * Cumulative Illumination (%)
-    * Longest Shadow Duration (hours)
-    * Direct-to-Earth Communication (%)
-    * Longest Communication Blackout (hours)
-    * Surface Slope Gradient ($^\circ$)
-    * Topographic Elevation Datum ($m$)
-    * Composite Suitability Score ($/100$)
-  * **Multi-Site Radar Chart**: Visualizes relative strengths across solar access, comm availability, flatness, and elevation vantage.
-  * **Selection Sync**: Clicking any site in the comparison table sets it as the active global site.
+* **Purpose**: Side-by-side comparative trade analysis and multi-scenario simulation allowing mission architects to compare up to 8 independent operational scenarios across different candidate landing sites, custom landing coordinates, and seasonal landing dates.
+* **Comparison Modes**:
+  1. **Mode A: Different Sites, Same Date**: Evaluates distinct candidate regions or custom coordinates under an identical mission launch window to determine optimal landing geography.
+  2. **Mode B: Same Site, Different Dates**: Evaluates a single landing zone across seasonal illumination windows (e.g. December vs June vs March) or alternate Artemis launch opportunities to detect seasonal solar valleys and communication dropouts.
+  3. **Mode C: Matrix (Different Sites & Different Dates)**: Full trade matrix across diverse geographic coordinates, landing epochs, and lander/rover hardware configurations.
+* **Scenario Parameter Independence**:
+  Each scenario maintains its own completely decoupled parameters (no shared global state):
+  - **Landing Site / Custom Coordinates**: Choose from candidate catalog or enter custom Selenographic latitude, longitude, and elevation.
+  - **Temporal Parameters**: Independent landing date, time (UTC), mission duration (1-30 days), and calculation step (1-6 hours).
+  - **Power Subsystem**: Solar array area ($m^2$), photovoltaic efficiency (%), and tracking mode (Horizontal Fixed, Vertical Azimuth Tracking, Dual-Axis Tracking).
+  - **Energy Storage**: Battery capacity ($Wh$), initial State of Charge (%), and minimum safe reserve margin (Depth-of-Discharge cutoff).
+  - **Surface Power Demands**: Base avionics hotel load ($W$), active science payload load ($W$), and lunar night survival heater load ($W$).
+  - **Hardware Presets**: One-click configuration for Artemis Lander ($4.5\text{ m}^2, 5000\text{ Wh}$), Science Rover ($1.2\text{ m}^2, 1200\text{ Wh}$), and Surface Habitat ($18.0\text{ m}^2, 35000\text{ Wh}$).
+* **12 Comprehensive Scientific Metrics (Calculated from Real Engines)**:
+  - **Solar Elevation (Mean & Max)**: Topocentric Sun elevation above horizon ($^\circ$).
+  - **Total Sunlight Duration & Availability**: Hours and percentage of mission with unshadowed solar line-of-sight.
+  - **Total Darkness Duration & Longest Continuous Shadow**: Critical shadow intervals for thermal/battery survival.
+  - **Longest Continuous Sunlight Run**: Maximum unbroken science operational window.
+  - **Earth Visibility Duration & Availability**: Direct-to-Earth (DTE) radio contact percentage.
+  - **Longest Communication Blackout**: Maximum duration without DTE link to the Deep Space Network.
+  - **Number of Communication Windows**: Discrete contact opportunities over mission duration.
+  - **Minimum Battery State of Charge (%)**: Lowest battery SoC reached during shadow or peak loads.
+  - **Total Solar Energy Generated ($kWh$)**: Cumulative photovoltaic output.
+  - **Power Survival Status**: Health classification (`NOMINAL`, `SURVIVED_WITH_MARGIN`, `DEGRADED_MARGIN`, `BATTERY_DEPLETED`).
+  - **Overall Mission Suitability Score**: Multi-criteria weighted score ($0-100$) reflecting illumination, comms, slope safety, and power margin.
+* **Interactive Visualizations**:
+  - **Scenario Configuration Cards**: Overview cards with Rank badge, hardware specs, and buttons to Edit, Duplicate, or Remove scenarios.
+  - **Comparative Data Matrix Table**: Full tabular view with automatic **green best-in-class** and **rose worst-in-class** cell highlighting.
+  - **Comparative Metric Bar Charts**: Side-by-side grouped bars for Solar Illumination %, Earth Comm %, Mission Suitability, and Minimum Battery SoC.
+  - **Synchronized Sunlight & Earth Comm Timelines**: Micro-timeline gantt charts showing solar line-of-sight and Earth LOS intervals.
+  - **Synchronized Battery SoC Overlaid Curves**: Multi-scenario time-series graph with a dashed 20% DoD red cutoff line.
+  - **Scenario Leaderboard & Risk Dossiers**: Rank cards detailing key operational strengths and mission hazards.
+  - **Data Export**: Export complete multi-scenario trade analysis as formatted **CSV** or **JSON** for mission documentation.
 
 ---
 
 ### 3.9 MCDA Ranking & Constraints Engine
 * **Access Tab**: Click **`MCDA Ranking`**
-* **Purpose**: Configurable Multi-Criteria Decision Analysis (MCDA) tool allowing mission architects to define trade-off weights and enforce hard operational constraints.
+* **Purpose**: Multi-Attribute Decision Analysis framework ranking candidate landing sites against user-defined mission preferences and engineering survival thresholds.
 * **Key Features**:
-  * **Weight Sliders (Auto-normalized)**:
+  * **6 Normalized Criteria Weights**: Sliders automatically normalize across all operational priorities:
     * *Solar Illumination Weight* (Default: $0.35$)
     * *Earth Communication Weight* (Default: $0.30$)
     * *Slope Safety Weight* (Default: $0.20$)
     * *Elevation Vantage Weight* (Default: $0.15$)
+    * *Power Survival Weight* (Default: $0.00$, customizable up to $1.00$)
+    * *Blackout Resilience Weight* (Default: $0.00$, customizable up to $1.00$)
   * **Hard Constraint Thresholds**:
-    * *Minimum Illumination Percentage* (e.g. $50\%$)
-    * *Minimum Communication Availability* (e.g. $40\%$)
+    * *Minimum Illumination Percentage* (e.g. $40\%$)
+    * *Minimum Communication Availability* (e.g. $30\%$)
     * *Maximum Allowable Slope* (e.g. $12.0^\circ$)
-    * *Maximum Continuous Shadow Duration* (e.g. $72.0\text{ h}$)
+    * *Maximum Continuous Shadow Duration* (e.g. $80.0\text{ h}$)
+    * *Minimum Battery SoC Cutoff* (e.g. $20.0\%$)
+    * *Maximum Communication Blackout* (e.g. $48.0\text{ h}$)
   * **Ranked Sites Output**:
     * Sorted ranking list ($1, 2, 3...$) with composite score ($/100$).
-    * Factor breakdown pills displaying individual utility scores.
+    * Factor breakdown pills displaying individual utility scores across all 6 criteria.
     * Transparent explainability narrative articulating why the site earned its rank.
     * Key Strengths & Operational Risks summary.
     * Risk Level categorization badge (`LOW_RISK`, `MODERATE_RISK`, `HIGH_RISK`).
@@ -276,25 +369,32 @@ The left sidebar controls all global inputs across the entire application:
 
 ### 3.10 Mission Power & Battery Simulation
 * **Access Tab**: Click **`Power Simulation`**
-* **Purpose**: Electrical Power System (EPS) simulator modeling solar array generation, active loads, thermal survival heaters, and battery State-of-Charge (SoC).
+* **Purpose**: Electrical Power System (EPS) simulator modeling 3D vector solar incidence, panel tracking, active loads, thermal survival heaters, and battery electrochemical State-of-Charge (SoC).
 * **Key Features**:
+  * **Physics-Based 3D Solar Vector Incidence Angle**:
+    * Calculates exact vector dot product: $\cos\theta_{\text{inc}} = \cos\alpha_\odot\sin\beta\cos(\phi_\odot - \gamma) + \sin\alpha_\odot\cos\beta$.
+    * Directly models array tilt angle ($\beta \in [0^\circ - 90^\circ]$) and array azimuth orientation ($\gamma \in [0^\circ - 360^\circ]$).
+    * Environmental derating: Incorporates dust degradation factor ($f_{\text{dust}} \approx 0.98$) and wiring/MPPT loss factor ($f_{\text{wiring}} \approx 0.97$).
   * **Solar Array Tracking Architecture Selector**:
-    * `VERTICAL_AZIMUTH_TRACKING`: Mast-mounted vertical array rotating to track low polar Sun. Harvests $> 99.9\%$ of solar flux.
+    * `VERTICAL_AZIMUTH_TRACKING`: 1-Axis vertical array slewing in azimuth to follow low grazing polar Sun.
+    * `DUAL_AXIS_TRACKING`: 2-Axis heliostat tracking normal to the solar vector.
+    * `TILTED_FIXED`: Fixed tilted panel with customizable tilt and azimuth angles.
+    * `FIXED_VERTICAL`: Fixed vertical panel.
     * `HORIZONTAL_FLAT`: Horizontal deck array. Suffers extreme grazing incidence and generates $< 3\%$ of solar flux.
-    * `FIXED_VERTICAL`: Fixed North-facing vertical panel.
-    * `TILTED_OPTIMAL`: Array tilted at $80^\circ$ from horizontal.
-  * **Lander Hardware Parameters**:
-    * Solar array effective area ($m^2$) & cell efficiency (e.g. $30\%$ triple-junction GaAs).
-    * Total battery capacity ($Wh$, e.g. $5000\text{ Wh}$).
+    * `TILTED_OPTIMAL`: Sun-facing optimal tilt.
+  * **Battery Electrochemical & Thermal Parameters**:
+    * Coulombic round-trip efficiency: charging efficiency ($\eta_{\text{chg}} = 94\%$) and discharging efficiency ($\eta_{\text{dis}} = 95\%$).
+    * C-rate charge intake power limit (`max_charge_power_w`) and maximum discharge limit (`max_discharge_power_w`) with power curtailment tracking.
     * Initial State of Charge ($100\%$) and minimum safe DoD threshold ($20\%$).
     * Continuous base hotel load ($W$), active daytime payload load ($W$), and shadow thermal survival heater load ($W$).
-  * **Simulation Outputs**:
-    * Battery State-of-Charge (%) timeline graph over the mission duration.
-    * Solar power generation vs load timeline ($W$).
-    * Power surplus / deficit indicators.
-    * Total energy generated ($kWh$) vs total energy consumed ($kWh$).
-    * EPS Health Status (`NOMINAL`, `DEGRADED_MARGIN`, `CRITICAL_DEPLETION`).
-    * Battery depletion alert if SoC dips below the safe cutoff.
+  * **Simulation Outputs & Survival Telemetry**:
+    * Battery State-of-Charge (%) timeline graph with minimum safe DoD reference line.
+    * Solar power generation vs load timeline ($W$) and curtailed excess power ($W$).
+    * Solar incidence angle ($\theta_{\text{inc}}^\circ$) telemetry chart.
+    * Peak generation, total energy generated ($kWh$), total consumed ($kWh$), and net energy balance.
+    * Estimated survival duration (hours until DoD breach) and hours below safe cutoff.
+    * Active power shortage warning notices alerting planners to battery depletion or narrow survival margins.
+    * Explicit thermodynamic modeling limitation notice (cells assumed thermally maintained at nominal $0^\circ\text{C}-20^\circ\text{C}$ via survival heaters; cryogenic electrochemical derating below $0^\circ\text{C}$ is not modeled).
 
 ---
 
@@ -383,6 +483,52 @@ The left sidebar controls all global inputs across the entire application:
 4. Switch to the **`Live QuickMap Web`** view:
    - If your browser displays the frame, interact directly with the Intuitive Machines / ASU map interface.
    - If your browser blocks inline framing due to `X-Frame-Options: sameorigin`, click **`Launch Fullscreen QuickMap`** to open the pre-configured session (`stack=3314`, `proj=10`, `earthShadowEnabled=true`) in a full window.
+
+---
+
+### Workflow G: Advanced Multi-Scenario Trade Study (Comparing Sites & Launch Dates)
+1. Click the **`Compare Sites`** tab in the top navigation bar.
+2. Select your comparison strategy using the **Mode Selector**:
+   - **Mode A (Different Sites, Same Date)**: To evaluate which landing location offers the best solar and communication conditions for a fixed launch window.
+   - **Mode B (Same Site, Different Dates)**: To compare seasonal launch windows for a fixed site (e.g., Shackleton Rim in December vs March vs July) to pinpoint when the Sun elevation is highest and shadows are shortest.
+   - **Mode C (Matrix)**: To compare completely independent combinations of locations, dates, and hardware sizes.
+3. Use the **Quick Presets** buttons (e.g. `Winter Solstice Launch: Dec 2026` or `Seasonal Windows (Dec / Mar / Jul)`) to load realistic baseline scenarios, or click **`+ Add Scenario`** to add a custom scenario.
+4. To customize a scenario:
+   - Click the **`⚙` (Edit)** button on any scenario card.
+   - Select a candidate site from the dropdown or enter custom latitude/longitude coordinates.
+   - Set the landing epoch (date and time UTC), mission duration, and calculation step.
+   - Adjust power parameters: solar array area ($m^2$), efficiency, tracking mode, battery capacity ($Wh$), and surface loads ($W$).
+   - Choose a hardware preset (`Lander Preset`, `Rover Preset`, `Habitat Preset`) to auto-fill realistic values.
+   - Click **`Save Scenario Parameters`**.
+5. Use **Duplicate** (`⎘`) to clone a scenario and test parameter sensitivities (e.g. comparing fixed horizontal solar panels vs vertical azimuth-tracking panels).
+6. Click **`⚡ Run Multi-Scenario Comparison`**:
+   - The backend runs parallel ephemeris, LOLA DEM ray-tracing, and EPS simulations for each scenario.
+   - Review the **Leaderboard & Risk Cards** to see overall rankings and key operational strengths/hazards.
+   - Inspect the **Comparative Data Matrix Table** with automatic green (best-in-class) and red (worst-in-class) highlights across all 12 metrics.
+   - Analyze the **Comparative Bar Charts** for solar illumination, Earth comms, suitability score, and minimum battery SoC.
+   - Examine the **Synchronized Sunlight & Earth Comm Timelines** to compare continuous operational windows and blackouts.
+   - Check the **Synchronized Battery SoC Overlaid Curves** against the 20% DoD red limit line to confirm power survival.
+7. Click **`Export CSV`** or **`Export JSON`** to download the comprehensive scenario results for your mission trade study report.
+
+---
+
+### Workflow H: Topocentric Sky-Horizon Evaluation & Ridge Occlusion Analysis
+1. In the **Left Sidebar**, select your target landing site (e.g. **`Shackleton Crater Rim`** or **`Nobile Rim 1`**).
+2. Click the **`Sky Horizon`** tab in the top navigation bar (or click **`Combined Sky Horizon →`** inside the Solar, Earth, or Terrain tabs).
+3. The **360° Celestial Horizon Polar Radar** renders the local celestial dome with the variable LOLA DEM terrain horizon mask (shaded red boundary) and the $0^\circ$ Geometric Horizon circle.
+4. Observe the current positions of the Sun (☀️ golden orb) and Earth (🌍 blue/cyan orb) with sightlines from the central lander:
+   - Check the **Sun Dossier**: observe current azimuth, elevation, clearance angle ($\Delta el$), and time remaining until the next terrain shadow ingress ("sunset").
+   - Check the **Earth Dossier**: observe current elevation, clearance above crater rims, direct line-of-sight status, and time remaining until next Earthset.
+5. Press the **`▶ PLAY`** transport button (or scrub the timeline slider):
+   - Watch the Sun track along its polar azimuth trajectory. When the solar marker crosses the red terrain boundary, observe it transition to a dark slashed orb, indicating shadow ingress by an occulting ridge.
+   - Watch Earth oscillate along its libration loop. Observe whether libration causes Earth to dip below local rim topography, triggering a communication blackout.
+6. Switch to **`3D Surface Scene`** (or **`Dual View`**):
+   - Orbit and zoom with the mouse around the 3D lander.
+   - Notice the dynamic directional sunlight beam casting real-time shadows across the craters and hills, synchronized with your timeline scrubbing!
+   - Observe the cyan line-of-sight ray to the 3D Earth sphere in the sky, turning dashed red when blocked by terrain.
+7. Switch to **`Horizon Strip`** to inspect the unwrapped $0^\circ \to 360^\circ$ panoramic profile showing both bodies' elevation relative to the local ridgeline.
+
+---
 
 ---
 

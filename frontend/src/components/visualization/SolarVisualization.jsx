@@ -23,6 +23,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import MetricCard from '../common/MetricCard';
+import DataProvenanceBanner from '../common/DataProvenanceBanner';
 import LoadingState from '../common/LoadingState';
 import ErrorState from '../common/ErrorState';
 import PolarRadarPlot from '../explorer/PolarRadarPlot';
@@ -34,6 +35,7 @@ export default function SolarVisualization({
   loading,
   error,
   onRetry,
+  onNavigateTab,
 }) {
   const [chartView, setChartView] = useState('elevation'); // 'elevation' | 'flux' | 'radar'
 
@@ -68,6 +70,15 @@ export default function SolarVisualization({
 
   return (
     <div className="space-y-6">
+      {/* 0. DATA PROVENANCE & ACCURACY BANNER */}
+      <DataProvenanceBanner
+        ephemerisSource={illuminationData.ephemeris_source}
+        terrainSource={illuminationData.terrain_source}
+        demResolutionM={illuminationData.dem_resolution_m}
+        calculationStatus={illuminationData.calculation_status}
+        dataQualityWarning={illuminationData.data_quality_warning}
+      />
+
       {/* 1. TOP METRIC GAUGES */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricCard
@@ -133,6 +144,16 @@ export default function SolarVisualization({
               </button>
             ))}
           </div>
+
+          {onNavigateTab && (
+            <button
+              onClick={() => onNavigateTab('skyhorizon')}
+              className="flex items-center space-x-1.5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs font-mono text-cyan-300 hover:bg-cyan-500/20 transition-colors shadow-sm"
+            >
+              <span>Combined Sky Horizon</span>
+              <Compass className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
         {/* VIEW A: SOLAR ELEVATION VS TERRAIN HORIZON MASK */}

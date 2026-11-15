@@ -44,6 +44,11 @@ export function useSites() {
     fetchSites();
   }, [fetchSites]);
 
+  const addCustomSite = useCallback((newSite) => {
+    setSites((prev) => [newSite, ...prev.filter((s) => s.id !== newSite.id)]);
+    setSelectedSiteId(newSite.id);
+  }, []);
+
   const selectedSite = sites.find((s) => s.id === selectedSiteId) || sites[0] || null;
 
   return {
@@ -55,5 +60,6 @@ export function useSites() {
     error,
     apiOnline,
     refetch: fetchSites,
+    addCustomSite,
   };
 }

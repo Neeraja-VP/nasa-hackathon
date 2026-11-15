@@ -29,6 +29,7 @@ export function useSiteAnalysis(currentSite, missionConfig) {
       start_date: new Date(missionConfig.startDate).toISOString(),
       duration_days: Number(missionConfig.durationDays),
       step_hours: Number(missionConfig.stepHours),
+      use_live_horizons: Boolean(missionConfig.useLiveHorizons),
     };
 
     async function loadAnalysis() {
@@ -68,6 +69,12 @@ export function useSiteAnalysis(currentSite, missionConfig) {
 
         if (commRes.status === 'fulfilled') {
           setCommunicationData(commRes.value);
+        } else {
+          console.error('Earth Communication calculation failed:', commRes.reason);
+          if (!hasError) {
+            hasError = true;
+            errMsg = commRes.reason?.response?.data?.error?.message || commRes.reason?.message || 'Earth communication telemetry failed.';
+          }
         }
 
         if (terrRes.status === 'fulfilled') {
@@ -98,6 +105,7 @@ export function useSiteAnalysis(currentSite, missionConfig) {
     missionConfig.mastHeightM,
     missionConfig.minCommElevationDeg,
     missionConfig.antennaHeightM,
+    missionConfig.useLiveHorizons,
   ]);
 
   return {

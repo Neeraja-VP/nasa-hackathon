@@ -13,6 +13,8 @@ An interactive scientific decision-support platform designed to evaluate, rank, 
 
 ## 🌟 Key Capabilities
 
+- **Interactive Combined Sky-Horizon Simulator (`SkyHorizonView`)**: Combined topocentric celestial sphere simulator showing Sun and Earth simultaneously against the landing site's actual 360° LOLA DEM terrain horizon mask, featuring variable terrain obstruction vs 0° geometric horizon distinction, polar grazing shadow ingress/egress predictions, Earth libration occultation tracking, transport timeline controls (Play/Pause, speed, scrubbing), and synchronized Three.js 3D local surface scene with real-time shadow casting.
+- **Advanced Multi-Scenario Comparison & Launch Window Trade Study**: Evaluate 2 to 8 independent mission scenarios across Mode A (different sites, same date), Mode B (same site, different seasonal dates), and Mode C (matrix) with decoupled hardware configurations, calculating 12 scientific metrics with best/worst highlights, synchronized timelines, and CSV/JSON export.
 - **NASA LROC QuickMap Visualizer (Stack #3314)**: Integrated visualization of the ASU / NASA LROC QuickMap cartographic environment (`https://share.google/sCb5mzv7y0G7kEfA4`), featuring South Pole Polar Stereographic projection (EPSG:3032 / `proj=10`), multi-layer composite stack (LROC WAC 64m/px mosaic, LOLA DEM, LROC NAC strips, PSR water ice traps), real-time grazing sunlight simulation (`earthShadowEnabled=true`), candidate site quick-jump presets, and seamless deep-linking.
 - **Interactive 3D Moon Surface & South Pole DEM**: Full Three.js WebGL 3D rendering of the Lunar South Pole ($80^\circ\text{S} - 90^\circ\text{S}$) using NASA LOLA elevation data, featuring dynamic grazing solar illumination, suspended Earth with libration orientation, 3 viewing modes (South Pole DEM, Global Moon, Lander First-Person view), and 4 scientific shading colormaps (Regolith, LOLA elevation heatmap, slope safety, wireframe).
 - **Interactive Lunar South Pole 2D Explorer**: Explore candidate landing sites (Shackleton Rim, Connecting Ridge, Malapert Mountain, etc.) with real selenographic coordinates and polar stereographic projection.
@@ -59,12 +61,57 @@ npm run dev
 ```
 Frontend application will be live at: `http://localhost:5173`
 
-### 3. Running Unit Tests (66 Tests Across All Subsystems)
+### 3. Running Unit Tests Across All Subsystems
 ```powershell
 cd backend
 $env:PYTHONPATH="."
 python -m pytest tests -v
 ```
+
+---
+
+## ⚙️ Configuration & Environment Variables
+
+All parameters can be configured via environment variables or a `.env` file in the `backend/` directory without exposing credentials:
+
+| Variable | Default Value | Description |
+| :--- | :--- | :--- |
+| `LUNA_HORIZONS_API_BASE_URL` | `https://ssd.jpl.nasa.gov/api/horizons.api` | NASA JPL Horizons public REST API endpoint |
+| `LUNA_HORIZONS_TIMEOUT_SECONDS`| `15.0` | Network request timeout for ephemeris retrieval |
+| `LUNA_HORIZONS_CACHE_DIR` | `datasets/cache/horizons` | Deterministic disk cache for JPL Horizons responses |
+| `LUNA_LOLA_DEM_PATH` | `datasets/dem` | Directory containing LOLA GeoTIFF, PDS IMG, or NPZ rasters |
+| `LUNA_API_PORT` | `8000` | FastAPI server listening port |
+| `LUNA_CORS_ORIGINS` | `http://localhost:5173,http://localhost:3000` | Allowed frontend origins for CORS |
+
+Example `.env` configuration:
+```bash
+# JPL Horizons Ephemeris Configuration
+LUNA_HORIZONS_API_BASE_URL=https://ssd.jpl.nasa.gov/api/horizons.api
+LUNA_HORIZONS_TIMEOUT_SECONDS=15.0
+LUNA_HORIZONS_CACHE_DIR=datasets/cache/horizons
+
+# LOLA Elevation Model Path
+LUNA_LOLA_DEM_PATH=datasets/dem
+```
+
+---
+
+## 🛰️ Scientific Accuracy & Data Source Transparency
+
+LUNA NAVIGATOR enforces strict transparency regarding the origin of all astronomical and topographic calculations. Simulation outputs, telemetry headers, and UI widgets are explicitly labeled with their exact data provenance:
+
+1. **`LIVE NASA HORIZONS DATA`**: Topocentric solar and terrestrial coordinates queried live from NASA JPL Horizons using Moon-surface observer coordinates (`coord@301`) and DE440/LE440 physical librations.
+2. **`CACHED NASA HORIZONS DATA`**: Deterministically cached verified Horizons ephemeris retrieved from disk cache (`datasets/cache/horizons/`).
+3. **`ANALYTICAL FALLBACK DATA`**: Analytical DE440 ephemeris algorithm applied when operating fully offline or when external services are unreachable. **Never silently substituted or labeled as live NASA data.**
+
+### LOLA DEM Loading Hierarchy
+When calculating 360° terrain horizon obstruction profiles, the terrain ray tracer searches for DEM data in the following prioritized order:
+1. High-resolution GeoTIFF (`lola_south_pole_100m.tif`)
+2. NASA PDS binary image and label (`ldem_80s_100m.img` / `ldem_80s_100m.lbl`)
+3. Pre-compiled verified benchmark DEM (`lola_south_pole_benchmark.npz` / `.tif`)
+4. Procedural calibrated LOLA topography fallback (`CALIBRATED_LOLA_PROCEDURAL_V1`)
+
+For complete dataset download instructions, see [Planetary Data Sources](docs/data-sources.md).
 
 ---
 
@@ -87,7 +134,9 @@ docker-compose -f docker-compose.prod.yml up --build -d
 
 ## 📚 Technical Documentation & Guides
 
-- [Official User Guide](docs/user-guide.md) — Comprehensive walkthrough of all 9 views and workflows
+- [Final Implementation & Verification Report](FINAL_IMPLEMENTATION_REPORT.md) — Complete audit, verification results (108/108 tests passing), and deployment specifications
+- [Demonstration & Evaluation Guide](docs/demonstration-guide.md) — Pre-configured Scenarios A, B, and C walkthrough, talking points, and evaluator script
+- [Official User Guide](docs/user-guide.md) — Comprehensive walkthrough of all views and workflows
 - [System Architecture](docs/architecture.md)
 - [Shared API Contracts](docs/api-contracts.md)
 - [Scientific & Mathematical Methodology](docs/scientific-methodology.md)

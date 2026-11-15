@@ -15,6 +15,7 @@ import {
   Bot,
   Globe,
   Map,
+  Eye,
 } from 'lucide-react';
 
 export const NAVIGATION_TABS = [
@@ -22,6 +23,7 @@ export const NAVIGATION_TABS = [
   { id: 'explorer', label: 'Lunar Explorer', icon: MapPin },
   { id: 'moon3d', label: '3D Moon Surface', icon: Globe },
   { id: 'quickmap', label: 'LROC QuickMap', icon: Map },
+  { id: 'skyhorizon', label: 'Sky Horizon', icon: Eye },
   { id: 'illumination', label: 'Solar Illumination', icon: Sun },
   { id: 'communication', label: 'Earth Comm (DTE)', icon: Radio },
   { id: 'terrain', label: 'Terrain Horizon', icon: Mountain },
@@ -36,6 +38,7 @@ export default function Header({
   onTabChange,
   apiOnline,
   selectedSite,
+  ephemerisSource,
   sidebarOpen,
   onToggleSidebar,
 }) {
@@ -98,6 +101,30 @@ export default function Header({
           <div className="hidden xl:flex items-center space-x-2 rounded-lg border border-luna-800 bg-luna-850/60 px-3 py-1 font-mono text-xs">
             <span className="text-slate-400">SITE:</span>
             <span className="font-bold text-slate-200 truncate max-w-[140px]">{selectedSite.name}</span>
+          </div>
+        )}
+
+        {ephemerisSource && (
+          <div className="hidden lg:flex items-center space-x-1.5 rounded-lg border border-luna-800 bg-luna-950/60 px-2.5 py-1 text-[11px] font-mono">
+            <span className="text-slate-400">EPHEMERIS:</span>
+            <span
+              className={`font-semibold flex items-center gap-1 ${
+                ephemerisSource.includes('LIVE')
+                  ? 'text-emerald-400'
+                  : ephemerisSource.includes('CACHED')
+                  ? 'text-cyan-400'
+                  : 'text-amber-400'
+              }`}
+            >
+              {ephemerisSource.includes('LIVE') && (
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              )}
+              {ephemerisSource.includes('LIVE')
+                ? 'NASA HORIZONS (LIVE)'
+                : ephemerisSource.includes('CACHED')
+                ? 'NASA HORIZONS (CACHED)'
+                : 'DE440 ANALYTICAL'}
+            </span>
           </div>
         )}
 

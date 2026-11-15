@@ -41,6 +41,10 @@ class TerrainHorizonResponse(BaseModel):
     elevation_m: float
     observer_height_m: float
     elevation_datum: str = "Lunar Sphere R=1737.4 km (NASA LOLA)"
+    terrain_source: str = Field(default="REAL NASA LOLA DEM", description="DEM source identifier")
+    dem_resolution_m: Optional[float] = Field(default=1200.0, description="DEM spatial resolution in meters per pixel")
+    calculation_status: str = Field(default="NOMINAL", description="'NOMINAL' | 'FALLBACK_APPLIED'")
+    data_quality_warning: Optional[str] = Field(default=None, description="Quality alert or fallback justification")
     horizon_points: List[HorizonPoint]
     max_horizon_elevation_deg: float
     min_horizon_elevation_deg: float

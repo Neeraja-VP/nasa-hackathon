@@ -21,6 +21,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import MetricCard from '../common/MetricCard';
+import DataProvenanceBanner from '../common/DataProvenanceBanner';
 import LoadingState from '../common/LoadingState';
 import ErrorState from '../common/ErrorState';
 import { formatAngle } from '../../utils/formatters';
@@ -30,6 +31,7 @@ export default function TerrainHorizonView({
   loading,
   error,
   onRetry,
+  onNavigateTab,
 }) {
   const [activeTab, setActiveTab] = useState('elevation'); // 'elevation' | 'distance' | 'table'
 
@@ -64,6 +66,15 @@ export default function TerrainHorizonView({
 
   return (
     <div className="space-y-6">
+      {/* 0. DATA PROVENANCE & ACCURACY BANNER */}
+      <DataProvenanceBanner
+        ephemerisSource="NASA LOLA TOPOCENTRIC HORIZON"
+        terrainSource={terrainData.terrain_source}
+        demResolutionM={terrainData.dem_resolution_m}
+        calculationStatus={terrainData.calculation_status || 'NOMINAL'}
+        dataQualityWarning={terrainData.data_quality_warning}
+      />
+
       {/* 1. TOP HORIZON STATS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricCard
@@ -128,6 +139,16 @@ export default function TerrainHorizonView({
               </button>
             ))}
           </div>
+
+          {onNavigateTab && (
+            <button
+              onClick={() => onNavigateTab('skyhorizon')}
+              className="flex items-center space-x-1.5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs font-mono text-cyan-300 hover:bg-cyan-500/20 transition-colors shadow-sm"
+            >
+              <span>Combined Sky Horizon</span>
+              <Compass className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
         {/* VIEW 1: HORIZON ELEVATION CURVE */}

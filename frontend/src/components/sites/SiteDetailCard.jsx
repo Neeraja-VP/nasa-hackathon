@@ -16,6 +16,7 @@ import {
 import { formatLatitude, formatLongitude } from '../../utils/coordinates';
 import { formatElevationM } from '../../utils/formatters';
 import Badge from '../common/Badge';
+import DataProvenanceBanner from '../common/DataProvenanceBanner';
 
 export default function SiteDetailCard({
   site,
@@ -131,6 +132,17 @@ export default function SiteDetailCard({
           </div>
         </div>
       </div>
+
+      {/* DATA PROVENANCE TELEMETRY */}
+      {(illuminationData || communicationData) && (
+        <DataProvenanceBanner
+          ephemerisSource={illuminationData?.ephemeris_source || communicationData?.ephemeris_source}
+          terrainSource={illuminationData?.terrain_source || communicationData?.terrain_source}
+          demResolutionM={illuminationData?.dem_resolution_m || communicationData?.dem_resolution_m}
+          calculationStatus={illuminationData?.calculation_status || communicationData?.calculation_status}
+          dataQualityWarning={illuminationData?.data_quality_warning || communicationData?.data_quality_warning}
+        />
+      )}
 
       {/* 2. GEOLOGY & OPERATIONAL MATRICES */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

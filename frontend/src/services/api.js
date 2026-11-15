@@ -12,7 +12,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000,
+  timeout: 60000,
 });
 
 // Helper to format API error messages
@@ -43,6 +43,11 @@ export const getSite = async (siteId) => {
   return response.data;
 };
 
+export const createCustomSite = async (params) => {
+  const response = await apiClient.post('/sites/custom', params);
+  return response.data;
+};
+
 // 2. Ephemeris Engine
 export const calculateEphemeris = async (params) => {
   const response = await apiClient.post('/ephemeris', params);
@@ -70,6 +75,11 @@ export const calculateCommunication = async (params) => {
 // 6. Site Comparison
 export const compareSites = async (params) => {
   const response = await apiClient.post('/compare', params);
+  return response.data;
+};
+
+export const compareScenarios = async (params) => {
+  const response = await apiClient.post('/compare/scenarios', params);
   return response.data;
 };
 

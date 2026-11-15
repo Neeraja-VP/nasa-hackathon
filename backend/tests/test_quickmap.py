@@ -2,7 +2,11 @@
 Unit Tests for LROC QuickMap API Endpoints
 """
 
-from fastapi.testclient import TestClient
+try:
+    from fastapi.testclient import TestClient
+except Exception:
+    from fastapi_client import FastAPITestClient as TestClient
+from fastapi_client import FastAPITestClient as TestClient
 from app.main import app
 
 client = TestClient(app)

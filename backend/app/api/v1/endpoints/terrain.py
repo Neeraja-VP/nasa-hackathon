@@ -18,3 +18,14 @@ def compute_terrain_horizon(request: TerrainHorizonRequest):
         return terrain_engine.generate_horizon_profile(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Terrain horizon processing failed: {str(e)}")
+
+
+@router.get("/terrain/metadata", tags=["Geospatial & Terrain"])
+def get_terrain_metadata():
+    """
+    Get active LOLA DEM metadata, spatial resolution, datum, and provenance.
+    """
+    try:
+        return terrain_engine.dem_loader.get_dem_metadata()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve terrain metadata: {str(e)}")

@@ -68,12 +68,20 @@ class TerrainHorizonEngine:
         min_el = min(elevations) if elevations else 0.0
         avg_el = round(sum(elevations) / len(elevations), 2) if elevations else 0.0
 
+        dem_meta = self.dem_loader.get_dem_metadata()
+        terrain_source = dem_meta.get("dem_source", "REAL NASA LOLA DEM")
+        dem_res = dem_meta.get("resolution_m", 1200.0)
+
         response = TerrainHorizonResponse(
             latitude=request.latitude,
             longitude=request.longitude,
             elevation_m=request.elevation_m,
             observer_height_m=request.observer_height_m,
             elevation_datum="Lunar Sphere R=1737.4 km (NASA LOLA)",
+            terrain_source=terrain_source,
+            dem_resolution_m=dem_res,
+            calculation_status="NOMINAL",
+            data_quality_warning=None,
             horizon_points=horizon_points,
             max_horizon_elevation_deg=round(max_el, 2),
             min_horizon_elevation_deg=round(min_el, 2),
