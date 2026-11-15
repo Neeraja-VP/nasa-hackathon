@@ -62,6 +62,25 @@ def test_ephemeris_calculation():
     assert "earth_elevation_deg" in first_pt
 
 
+def test_ephemeris_validate_endpoint():
+    res = client.get("/api/ephemeris/validate?site_id=shackleton-rim&epoch_iso=2026-12-01T00:00:00Z")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["site_id"] == "shackleton-rim"
+    assert data["is_validated"] is True
+    assert "residuals" in data
+    assert data["residuals"]["max_residual_deg"] <= 0.50
+
+
+def test_ephemeris_horizons_status_endpoint():
+    res = client.get("/api/ephemeris/horizons-status")
+    assert res.status_code == 200
+    data = res.json()
+    assert "api_endpoint" in data
+    assert "cached_query_count" in data
+    assert "DE440" in data["ephemeris_datum"]
+
+
 def test_terrain_horizon():
     payload = {
         "latitude": -89.78,
@@ -172,3 +191,23 @@ def test_simulate_mission():
     assert "min_battery_soc_percent" in data
     assert "total_energy_generated_kwh" in data
     assert len(data["time_series"]) > 0
+
+
+def test_ai_mission_assistant_endpoint():
+    payload = {
+        "query": "Which candidate site is optimal for an Artemis III surface stay?",
+        "start_date": "2026-12-01T00:00:00Z",
+        "duration_days": 7.0,
+        "step_hours": 6.0
+    }
+    res = client.post("/api/assistant", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert "intent" in data
+    assert data["intent"] == "RECOMMEND_OPTIMAL_SITE"
+    assert "summary" in data
+    assert "detailed_analysis" in data
+    assert "scientific_evidence" in data
+    assert "safety_disclaimer" in data
+    assert "NASA" in data["safety_disclaimer"]
+

@@ -11,7 +11,9 @@ from app.api.v1.endpoints import (
     communication,
     compare,
     recommend,
-    simulate
+    simulate,
+    assistant,
+    quickmap
 )
 
 api_router = APIRouter()
@@ -25,3 +27,5 @@ api_router.include_router(communication.router)
 api_router.include_router(compare.router)
 api_router.include_router(recommend.router)
 api_router.include_router(simulate.router)
+api_router.include_router(assistant.router)
+api_router.include_router(quickmap.router)

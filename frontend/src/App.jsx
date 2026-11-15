@@ -10,6 +10,8 @@ import TerrainHorizonView from './components/visualization/TerrainHorizonView';
 import SiteRecommendation from './components/mcda/SiteRecommendation';
 import PowerSimulation from './components/simulation/PowerSimulation';
 import AIMissionAssistant from './components/assistant/AIMissionAssistant';
+import MoonSurface3D from './components/visualization/MoonSurface3D';
+import LROCQuickMapViewer from './components/visualization/LROCQuickMapViewer';
 import LoadingState from './components/common/LoadingState';
 import ErrorState from './components/common/ErrorState';
 import { useSites } from './hooks/useSites';
@@ -134,6 +136,33 @@ export default function App() {
           {!sitesLoading && sites.length > 0 && activeTab === 'explorer' && (
             <div className="h-[calc(100vh-140px)] w-full">
               <LunarExplorer
+                sites={sites}
+                selectedSiteId={selectedSiteId}
+                onSelectSite={setSelectedSiteId}
+                currentSite={selectedSite}
+                onNavigateTab={setActiveTab}
+              />
+            </div>
+          )}
+
+          {/* VIEW: 2.5 3D MOON SURFACE VISUALIZATION */}
+          {!sitesLoading && sites.length > 0 && activeTab === 'moon3d' && (
+            <div className="h-[calc(100vh-140px)] w-full">
+              <MoonSurface3D
+                sites={sites}
+                selectedSiteId={selectedSiteId}
+                onSelectSite={setSelectedSiteId}
+                currentSite={selectedSite}
+                missionConfig={missionConfig}
+                onNavigateTab={setActiveTab}
+              />
+            </div>
+          )}
+
+          {/* VIEW: 2.8 NASA LROC QUICKMAP VISUALIZATION */}
+          {!sitesLoading && sites.length > 0 && activeTab === 'quickmap' && (
+            <div className="h-[calc(100vh-140px)] w-full">
+              <LROCQuickMapViewer
                 sites={sites}
                 selectedSiteId={selectedSiteId}
                 onSelectSite={setSelectedSiteId}

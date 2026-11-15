@@ -1,9 +1,10 @@
 """
 LUNA NAVIGATOR — Recommendation Engine (Member 4 Ownership)
-Implements Multi-Criteria Decision Analysis (MCDA) for lunar landing site selection and ranking.
+Implements explainable Multi-Criteria Decision Analysis (MCDA) for lunar landing site selection and ranking.
+Adheres strictly to scientific evidence: does not fabricate data or treat a weighted score as NASA-certified safety.
 """
 
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple, Any
 from app.core.sites_catalog import load_candidate_sites, get_site_by_id
 from app.engines.illumination.engine import illumination_engine
 from app.engines.communication.engine import communication_engine
@@ -17,12 +18,28 @@ from app.schemas.recommend import (
     RecommendResponse
 )
 
+SAFETY_DISCLAIMER_TEXT = (
+    "SCIENTIFIC NOTICE: This ranking is an algorithmic Multi-Criteria Decision Analysis (MCDA) heuristic "
+    "based on orbital ephemerides (JPL DE440) and gridded LOLA topographic models. A high score reflects "
+    "mathematical alignment with user criteria weights and DOES NOT constitute NASA certification of landing "
+    "safety. Operational flight safety requires sub-meter obstacle detection, hazard avoidance, regolith "
+    "geotechnical bearing capacity assessment, landing gear touchdown dynamics, and terminal descent propellant margins."
+)
+
 
 class RecommendationEngine:
     """
     Ranks candidate landing sites using multi-criteria weighted scoring and operational constraints.
+    Provides transparent, evidence-based explainability and explicit risk demarcations.
     """
     
+    def __init__(self):
+        self._metrics_cache: Dict[Tuple[str, str, float, float], SiteComparisonMetrics] = {}
+
+    def _get_cache_key(self, site_id: str, start_date, duration_days: float, step_hours: float) -> Tuple[str, str, float, float]:
+        start_str = start_date.isoformat() if hasattr(start_date, "isoformat") else str(start_date)
+        return (site_id, start_str, float(duration_days), float(step_hours))
+
     def evaluate_site_metrics(
         self,
         site_id: str,
@@ -33,6 +50,10 @@ class RecommendationEngine:
         site = get_site_by_id(site_id)
         if not site:
             return None
+
+        cache_key = self._get_cache_key(site_id, start_date, duration_days, step_hours)
+        if cache_key in self._metrics_cache:
+            return self._metrics_cache[cache_key]
             
         # 1. Illumination metrics
         illum_req = IlluminationRequest(
@@ -66,7 +87,7 @@ class RecommendationEngine:
             0.15 * elev_score
         )
         
-        return SiteComparisonMetrics(
+        metrics = SiteComparisonMetrics(
             site_id=site.id,
             name=site.name,
             latitude=site.latitude,
@@ -79,6 +100,8 @@ class RecommendationEngine:
             max_comm_blackout_hours=comm_res.longest_continuous_blackout_hours,
             overall_suitability_score=round(composite, 1)
         )
+        self._metrics_cache[cache_key] = metrics
+        return metrics
 
     def compare_sites(self, request: CompareRequest) -> CompareResponse:
         results: List[SiteComparisonMetrics] = []
@@ -169,10 +192,45 @@ class RecommendationEngine:
                 "elevation_m": metrics.elevation_m
             }
             
+            # Explainability: Extract key strengths & operational risks
+            strengths = []
+            if metrics.illumination_percentage >= 80.0:
+                strengths.append(f"High cumulative solar availability ({metrics.illumination_percentage}%)")
+            if metrics.communication_percentage >= 75.0:
+                strengths.append(f"Extended Direct-to-Earth communication link ({metrics.communication_percentage}%)")
+            if metrics.slope_degrees <= 6.0:
+                strengths.append(f"Gentle landing surface gradient ({metrics.slope_degrees}°)")
+            if metrics.elevation_m >= 1000.0:
+                strengths.append(f"Elevated topographic vantage ({metrics.elevation_m:.0f} m) mitigating horizon occultation")
+            if not strengths:
+                strengths.append(f"Balanced operational baseline across evaluated criteria")
+
+            risks = []
+            if metrics.max_shadow_hours > 36.0:
+                risks.append(f"Extended continuous shadow of {metrics.max_shadow_hours}h requiring high battery capacity")
+            if metrics.max_comm_blackout_hours > 36.0:
+                risks.append(f"DTE communication blackout up to {metrics.max_comm_blackout_hours}h during unfavorable libration")
+            if metrics.slope_degrees > 8.0:
+                risks.append(f"Local slope gradient ({metrics.slope_degrees}°) increases touchdown stability hazard")
+            if not risks:
+                risks.append("Benign regional topography within standard mission margins")
+
+            # Risk level categorization
+            if metrics.slope_degrees > 10.0 or metrics.max_shadow_hours > 50.0:
+                risk_level = "HIGH_RISK"
+            elif metrics.slope_degrees > 7.0 or metrics.max_shadow_hours > 30.0 or metrics.max_comm_blackout_hours > 30.0:
+                risk_level = "MODERATE_RISK"
+            else:
+                risk_level = "LOW_RISK"
+
+            # Formulate structured explanation
+            primary_driver = "solar illumination" if norm_w_illum >= max(norm_w_comm, norm_w_slope, norm_w_elev) else \
+                             ("Earth communication" if norm_w_comm >= max(norm_w_illum, norm_w_slope, norm_w_elev) else "slope safety")
+            
             explanation = (
-                f"Evaluated with composite suitability of {total_score}/100. "
+                f"Suitability score of {total_score}/100 driven predominantly by {primary_driver} weighting. "
                 f"Solar availability is {metrics.illumination_percentage}% (max shadow {metrics.max_shadow_hours}h), "
-                f"Direct-to-Earth coverage is {metrics.communication_percentage}%, and terrain slope is {metrics.slope_degrees}°."
+                f"Direct-to-Earth coverage is {metrics.communication_percentage}%, and local terrain slope is {metrics.slope_degrees}°."
             )
             
             if violations:
@@ -190,10 +248,14 @@ class RecommendationEngine:
                     is_compliant=True,
                     scores_breakdown=breakdown,
                     raw_metrics=raw,
-                    explanation=explanation
+                    explanation=explanation,
+                    key_strengths=strengths,
+                    key_risks=risks,
+                    risk_level=risk_level,
+                    safety_disclaimer=SAFETY_DISCLAIMER_TEXT
                 ))
                 
-        # Sort ranked sites descending
+        # Sort ranked sites descending by composite score
         ranked_list.sort(key=lambda x: x.total_score, reverse=True)
         for i, s in enumerate(ranked_list, start=1):
             s.rank = i
@@ -203,7 +265,8 @@ class RecommendationEngine:
             duration_days=request.duration_days,
             weights_applied=w,
             ranking=ranked_list,
-            disqualified_sites=disqualified_list
+            disqualified_sites=disqualified_list,
+            scientific_disclaimer=SAFETY_DISCLAIMER_TEXT
         )
 
 

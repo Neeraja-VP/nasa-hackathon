@@ -9,6 +9,8 @@ import {
   Eye,
   Crosshair,
   Info,
+  Globe,
+  Map,
 } from 'lucide-react';
 import {
   polarProject,
@@ -24,6 +26,7 @@ export default function LunarExplorer({
   selectedSiteId,
   onSelectSite,
   currentSite,
+  onNavigateTab,
 }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -373,32 +376,56 @@ export default function LunarExplorer({
           ))}
         </div>
 
-        {/* Zoom & View Controls */}
-        <div className="pointer-events-auto flex items-center space-x-1 rounded-xl border border-luna-800 bg-luna-900/90 p-1 backdrop-blur-md shadow-lg">
-          <button
-            onClick={() => setZoom((z) => Math.min(z * 1.25, 4.0))}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 hover:bg-luna-800 hover:text-white"
-            title="Zoom In"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setZoom((z) => Math.max(z / 1.25, 0.6))}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 hover:bg-luna-800 hover:text-white"
-            title="Zoom Out"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => {
-              setZoom(1.0);
-              setPan({ x: 0, y: 0 });
-            }}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 hover:bg-luna-800 hover:text-white"
-            title="Reset View"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </button>
+        {/* Zoom & View Controls & 3D / QuickMap Switch */}
+        <div className="pointer-events-auto flex items-center space-x-2">
+          {onNavigateTab && (
+            <>
+              <button
+                onClick={() => onNavigateTab('quickmap')}
+                className="flex items-center space-x-1.5 rounded-xl border border-blue-500/50 bg-gradient-to-r from-blue-950/80 to-indigo-950/80 px-3 py-1.5 text-xs font-mono font-semibold text-blue-300 shadow-lg backdrop-blur-md hover:bg-blue-500/20 hover:text-white transition-all group"
+                title="Open LROC QuickMap (Stack #3314 & Solar Shadows)"
+              >
+                <Map className="h-4 w-4 text-blue-400 group-hover:scale-110 transition-transform" />
+                <span className="hidden md:inline">LROC QUICKMAP</span>
+              </button>
+
+              <button
+                onClick={() => onNavigateTab('moon3d')}
+                className="flex items-center space-x-1.5 rounded-xl border border-cyan-500/50 bg-gradient-to-r from-cyan-950/80 to-blue-950/80 px-3 py-1.5 text-xs font-mono font-semibold text-cyan-300 shadow-lg backdrop-blur-md hover:bg-cyan-500/20 hover:text-white transition-all group"
+                title="Switch to 3D Moon Surface Visualization (NASA LOLA DEM & Dynamic Sun)"
+              >
+                <Globe className="h-4 w-4 text-cyan-400 group-hover:rotate-12 transition-transform" />
+                <span>3D SURFACE VIEW</span>
+              </button>
+            </>
+          )}
+
+          <div className="flex items-center space-x-1 rounded-xl border border-luna-800 bg-luna-900/90 p-1 backdrop-blur-md shadow-lg">
+            <button
+              onClick={() => setZoom((z) => Math.min(z * 1.25, 4.0))}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 hover:bg-luna-800 hover:text-white"
+              title="Zoom In"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setZoom((z) => Math.max(z / 1.25, 0.6))}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 hover:bg-luna-800 hover:text-white"
+              title="Zoom Out"
+            >
+              <ZoomOut className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => {
+                setZoom(1.0);
+                setPan({ x: 0, y: 0 });
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 hover:bg-luna-800 hover:text-white"
+              title="Reset View"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 

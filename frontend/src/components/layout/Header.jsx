@@ -13,11 +13,15 @@ import {
   Menu,
   X,
   Bot,
+  Globe,
+  Map,
 } from 'lucide-react';
 
 export const NAVIGATION_TABS = [
   { id: 'overview', label: 'Site Overview', icon: Layers },
   { id: 'explorer', label: 'Lunar Explorer', icon: MapPin },
+  { id: 'moon3d', label: '3D Moon Surface', icon: Globe },
+  { id: 'quickmap', label: 'LROC QuickMap', icon: Map },
   { id: 'illumination', label: 'Solar Illumination', icon: Sun },
   { id: 'communication', label: 'Earth Comm (DTE)', icon: Radio },
   { id: 'terrain', label: 'Terrain Horizon', icon: Mountain },

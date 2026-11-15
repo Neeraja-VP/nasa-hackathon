@@ -20,6 +20,7 @@ export default defineConfig({
           'react-vendor': ['react', 'react-dom'],
           'charts-vendor': ['recharts'],
           'icons-vendor': ['lucide-react'],
+          'three-vendor': ['three'],
         }
       }
     }

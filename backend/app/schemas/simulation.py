@@ -1,9 +1,9 @@
 """
-LUNA NAVIGATOR — Mission Energy Simulation Schemas
+LUNA NAVIGATOR — Mission Energy Simulation Schemas (Member 4 Ownership)
 """
 
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field
 from app.schemas.common import DateRangeRequest
 
@@ -14,7 +14,7 @@ class SimulationRequest(DateRangeRequest):
     solar_efficiency: float = Field(default=0.30, gt=0.05, le=0.50, description="Solar cell conversion efficiency (e.g. 0.30 for 30% triple-junction GaAs)")
     solar_tracking_type: str = Field(
         default="VERTICAL_AZIMUTH_TRACKING",
-        description="Tracking mode: 'VERTICAL_AZIMUTH_TRACKING', 'FIXED_VERTICAL', 'HORIZONTAL_FLAT'"
+        description="Tracking mode: 'VERTICAL_AZIMUTH_TRACKING', 'FIXED_VERTICAL', 'HORIZONTAL_FLAT', 'TILTED_OPTIMAL'"
     )
     battery_capacity_wh: float = Field(default=5000.0, gt=100.0, description="Total battery storage capacity (Watt-hours)")
     initial_battery_soc_percent: float = Field(default=100.0, ge=10.0, le=100.0, description="Initial State of Charge (%)")
@@ -45,4 +45,17 @@ class SimulationResponse(BaseModel):
     total_energy_generated_kwh: float
     total_energy_consumed_kwh: float
     net_energy_balance_kwh: float
+    peak_solar_generation_w: float = Field(default=0.0, description="Maximum instantaneous solar generation in Watts")
+    average_solar_generation_w: float = Field(default=0.0, description="Mission-average solar generation in Watts")
+    max_continuous_discharge_hours: float = Field(default=0.0, description="Longest consecutive hours under battery discharge")
+    battery_survival_margin_percent: float = Field(default=0.0, description="Safety margin above minimum DoD limit (%)")
+    eps_health_status: str = Field(default="NOMINAL", description="'NOMINAL' | 'DEGRADED_MARGIN' | 'CRITICAL_DEPLETION'")
     time_series: List[PowerPoint]
+    scientific_disclaimer: str = Field(
+        default=(
+            "EPS SIMULATION NOTICE: Electrical power model calculates energy balance from topocentric solar flux and "
+            "terrain shadow occultation. Battery aging, degradation from thermal cycling, regolith dust accumulation, "
+            "and cable line losses require empirical flight system qualification."
+        ),
+        description="Engineering simulation boundary disclaimer"
+    )

@@ -10,6 +10,8 @@ import {
   Info,
   Layers,
   ArrowUpRight,
+  Globe,
+  Map,
 } from 'lucide-react';
 import { formatLatitude, formatLongitude } from '../../utils/coordinates';
 import { formatElevationM } from '../../utils/formatters';
@@ -96,6 +98,36 @@ export default function SiteDetailCard({
               </span>
               <span className="text-[10px] text-slate-400 font-mono">Mean Lunar Sphere</span>
             </div>
+
+            <button
+              onClick={() => onNavigateTab && onNavigateTab('moon3d')}
+              className="rounded-xl border border-blue-500/25 bg-blue-500/5 p-3.5 text-center min-w-[110px] hover:bg-blue-500/15 transition-colors cursor-pointer text-left"
+              title="Inspect 3D Lunar Topography &amp; Real-Time Sun Angle"
+            >
+              <span className="text-[10px] uppercase font-mono text-blue-400 block flex items-center justify-between">
+                <span>3D Terrain</span>
+                <Globe className="h-3 w-3" />
+              </span>
+              <span className="text-xl md:text-2xl font-bold font-mono text-blue-300 block mt-1">
+                DEM
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono">Interactive 3D</span>
+            </button>
+
+            <button
+              onClick={() => onNavigateTab && onNavigateTab('quickmap')}
+              className="rounded-xl border border-indigo-500/25 bg-indigo-500/5 p-3.5 text-center min-w-[110px] hover:bg-indigo-500/15 transition-colors cursor-pointer text-left"
+              title="Open LROC QuickMap Stack #3314 (Polar Stereographic)"
+            >
+              <span className="text-[10px] uppercase font-mono text-indigo-400 block flex items-center justify-between">
+                <span>QuickMap</span>
+                <Map className="h-3 w-3" />
+              </span>
+              <span className="text-xl md:text-2xl font-bold font-mono text-indigo-300 block mt-1">
+                LROC
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono">Stack #3314</span>
+            </button>
           </div>
         </div>
       </div>

@@ -13,7 +13,9 @@ An interactive scientific decision-support platform designed to evaluate, rank, 
 
 ## 🌟 Key Capabilities
 
-- **Interactive Lunar South Pole Explorer**: Explore candidate landing sites (Shackleton Rim, Connecting Ridge, Malapert Mountain, etc.) with real selenographic coordinates.
+- **NASA LROC QuickMap Visualizer (Stack #3314)**: Integrated visualization of the ASU / NASA LROC QuickMap cartographic environment (`https://share.google/sCb5mzv7y0G7kEfA4`), featuring South Pole Polar Stereographic projection (EPSG:3032 / `proj=10`), multi-layer composite stack (LROC WAC 64m/px mosaic, LOLA DEM, LROC NAC strips, PSR water ice traps), real-time grazing sunlight simulation (`earthShadowEnabled=true`), candidate site quick-jump presets, and seamless deep-linking.
+- **Interactive 3D Moon Surface & South Pole DEM**: Full Three.js WebGL 3D rendering of the Lunar South Pole ($80^\circ\text{S} - 90^\circ\text{S}$) using NASA LOLA elevation data, featuring dynamic grazing solar illumination, suspended Earth with libration orientation, 3 viewing modes (South Pole DEM, Global Moon, Lander First-Person view), and 4 scientific shading colormaps (Regolith, LOLA elevation heatmap, slope safety, wireframe).
+- **Interactive Lunar South Pole 2D Explorer**: Explore candidate landing sites (Shackleton Rim, Connecting Ridge, Malapert Mountain, etc.) with real selenographic coordinates and polar stereographic projection.
 - **Sun & Solar Illumination Modeling**: Real-time celestial ephemeris via NASA JPL Horizons, calculating solar azimuth, elevation, and terrain-cast shadows.
 - **Earth Visibility & Libration Analysis**: Compute Direct-to-Earth (DTE) communication availability, tracking lunar libration in latitude ($\pm 6.7^\circ$) and longitude ($\pm 7.9^\circ$).
 - **Topographic Horizon Ray Tracing**: Extract 360-degree local terrain horizon masks from NASA LOLA digital elevation models (DEM) to determine true line-of-sight obstructions.
@@ -25,28 +27,26 @@ An interactive scientific decision-support platform designed to evaluate, rank, 
 
 ## 👥 Team Responsibilities
 
-| Role | Module | Primary Work Directory |
-| :--- | :--- | :--- |
-| **Member 1 (Frontend)** | React dashboard, lunar visualization, charts | `frontend/` |
-| **Member 2 (Backend)** | FastAPI, JPL Horizons, Ephemeris calculations | `backend/app/api/`, `backend/app/engines/ephemeris/` |
-| **Member 3 (GIS / Compute)**| LOLA DEM processing, ray tracing, terrain horizon | `backend/app/engines/terrain/`, `datasets/` |
-| **Member 4 (AI / Integration)**| MCDA ranking engine, mission energy simulation, docs | `backend/app/engines/recommendation/`, `backend/app/engines/simulation/`, `docs/` |
+| Role | Module | Primary Work Directory | Status |
+| :--- | :--- | :--- | :--- |
+| **Member 1 (Frontend)** | React dashboard, lunar explorer, ephemeris charts | `frontend/` | Complete |
+| **Member 2 (Backend)** | FastAPI, JPL Horizons DE440, Ephemeris calculations | `backend/app/api/`, `backend/app/engines/ephemeris/` | Complete |
+| **Member 3 (GIS / Compute)**| LOLA DEM processing, ray tracing, terrain horizon | `backend/app/engines/terrain/`, `datasets/` | Complete |
+| **Member 4 (AI / Integration)**| MCDA ranking engine, mission energy simulation, AI assistant, deployment | `backend/app/engines/recommendation/`, `backend/app/engines/simulation/`, `backend/app/engines/assistant/` | Complete |
 
 ---
 
 ## 🚀 Quick Start (Local Development)
 
 ### Prerequisites
-- **Python 3.10+** (with NumPy, SciPy, FastAPI, Pydantic)
+- **Python 3.10+** (with NumPy, FastAPI, Pydantic, Pillow)
 - **Node.js 18+** & npm
 - **Git**
 
 ### 1. Backend Setup
 ```powershell
 cd backend
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+$env:PYTHONPATH="."
 uvicorn app.main:app --reload --port 8000
 ```
 Backend API interactive docs will be available at: `http://localhost:8000/docs`
@@ -59,29 +59,41 @@ npm run dev
 ```
 Frontend application will be live at: `http://localhost:5173`
 
-### 3. Running Unit Tests
+### 3. Running Unit Tests (66 Tests Across All Subsystems)
 ```powershell
 cd backend
-pytest -v
+$env:PYTHONPATH="."
+python -m pytest tests -v
 ```
 
 ---
 
 ## 🐳 Docker Deployment
 
-To launch the unified platform with PostgreSQL / PostGIS:
+### Development Deployment
 ```bash
 docker-compose up --build
 ```
 
+### Production Deployment
+```bash
+docker-compose -f docker-compose.prod.yml up --build -d
+```
+* **Frontend Web App**: `http://localhost:5173` (or `http://localhost:80`)
+* **Backend API Docs**: `http://localhost:8000/docs`
+* **PostgreSQL / PostGIS**: `localhost:5432`
+
 ---
 
-## 📚 Technical Documentation
+## 📚 Technical Documentation & Guides
 
+- [Official User Guide](docs/user-guide.md) — Comprehensive walkthrough of all 9 views and workflows
 - [System Architecture](docs/architecture.md)
 - [Shared API Contracts](docs/api-contracts.md)
 - [Scientific & Mathematical Methodology](docs/scientific-methodology.md)
 - [Planetary Data Sources](docs/data-sources.md)
+- [GIS & Provenance Methodology](docs/gis-methodology-and-provenance.md)
+- [AI Decision Support & System Integration](docs/system-integration-and-ai.md)
 - [Team Git & PR Workflow](docs/team-workflow.md)
 
 ---

@@ -49,7 +49,7 @@ def cartesian_to_selenographic(
     if r == 0:
         return (0.0, 0.0, -MOON_MEAN_RADIUS_M)
     
-    lat_rad = math.asin(z_m / r)
+    lat_rad = math.asin(max(-1.0, min(1.0, z_m / r)))
     lon_rad = math.atan2(y_m, x_m)
     
     lat_deg = math.degrees(lat_rad)
@@ -67,6 +67,11 @@ def get_topocentric_basis(
 ) -> Tuple[Tuple[float, float, float], Tuple[float, float, float], Tuple[float, float, float]]:
     """
     Compute orthonormal basis vectors (East, North, Up) for an observer on the lunar surface.
+    
+    In the IAU Mean Earth / Polar Axis frame:
+    - Up (Zenith): Normal to the mean lunar reference sphere
+    - North: Tangent pointing along meridian toward lunar North Pole (+Z)
+    - East: Tangent pointing toward increasing longitude (East = North x Up)
     
     Returns:
         (hat_east, hat_north, hat_up) where each is a unit 3D vector (x, y, z)
@@ -166,3 +171,33 @@ def great_circle_distance_m(
     a = math.sin(dphi / 2.0)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlam / 2.0)**2
     c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
     return MOON_MEAN_RADIUS_M * c
+
+
+def apparent_angular_diameter_deg(radius_km: float, distance_km: float) -> float:
+    """
+    Calculate apparent angular diameter (in degrees) of a spherical celestial body
+    at a given distance.
+    
+    Formula: theta = 2 * arctan(radius / distance)
+    """
+    if distance_km <= 0 or radius_km <= 0:
+        return 0.0
+    return math.degrees(2.0 * math.atan2(radius_km, distance_km))
+
+
+def subtended_horizon_angle_deg(
+    observer_elevation_m: float,
+    terrain_elevation_m: float,
+    ground_distance_m: float
+) -> float:
+    """
+    Calculate the geometric elevation angle (in degrees) subtended by a terrain feature
+    accounting for lunar spherical curvature.
+    
+    Formula: tan(alpha) = [h_terrain - h_observer - s^2 / (2 * R_moon)] / s
+    """
+    if ground_distance_m <= 0:
+        return 0.0
+    curv_drop = lunar_curvature_drop(ground_distance_m)
+    delta_h = terrain_elevation_m - observer_elevation_m - curv_drop
+    return math.degrees(math.atan2(delta_h, ground_distance_m))

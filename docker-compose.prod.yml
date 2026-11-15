@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgis/postgis:16-3.4
+    container_name: luna-database-prod
+    restart: always
+    environment:
+      POSTGRES_USER: luna_user
+      POSTGRES_PASSWORD: luna_password
+      POSTGRES_DB: luna_navigator
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U luna_user -d luna_navigator"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: luna-backend-prod
+    restart: always
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://luna_user:luna_password@database:5432/luna_navigator
+      - ENVIRONMENT=production
+      - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:80,http://localhost:3000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./datasets:/datasets
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: luna-frontend-prod
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+      - "80:5173"
+
+volumes:
+  postgres_prod_data:
