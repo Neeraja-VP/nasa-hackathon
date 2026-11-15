@@ -30,6 +30,7 @@ class QuickMapMetadataResponse(BaseModel):
     resolved_url: str = Field(...)
     projection: QuickMapProjection
     stack_id: int = Field(default=3314)
+    defs: str = Field(default="N4IgzGCMAsIFygPYAcCGBjAlgFwJ70gF9Cg", description="ACT-REACT layer stack definition payload")
     earth_shadow_enabled: bool = Field(default=True)
     extent: List[float] = Field(...)
     layers: List[QuickMapLayer]
@@ -42,4 +43,5 @@ class QuickMapUrlResponse(BaseModel):
     longitude: float
     site_id: Optional[str] = None
     stack_id: int
+    defs: str = Field(default="N4IgzGCMAsIFygPYAcCGBjAlgFwJ70gF9Cg")
     earth_shadow_enabled: bool

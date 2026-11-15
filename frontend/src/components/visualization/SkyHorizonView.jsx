@@ -1115,206 +1115,205 @@ export default function SkyHorizonView({
       </div>
 
       {/* 3. PRIMARY VISUALIZATION CANVAS AREA (Tasks 1, 2, 6, 7) */}
-      <div className="rounded-2xl border border-luna-800 bg-luna-900/70 p-4 md:p-6 shadow-xl space-y-4">
-        {/* VIEW 1: COMBINED 360° POLAR RADAR */}
-        {(viewMode === 'radar' || viewMode === 'dual') && (
-          <div className={`flex flex-col items-center justify-center ${viewMode === 'dual' ? 'w-full' : ''}`}>
-            {/* View options bar */}
-            <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-luna-800 text-xs font-mono">
-              <div className="flex items-center space-x-2 text-slate-300 font-semibold">
-                <Compass className="h-4 w-4 text-cyan-400" />
-                <span>360° CELESTIAL HORIZON POLAR RADAR (LOLA DEM RAY TRACE)</span>
-              </div>
-
-              <div className="flex items-center space-x-4 text-[11px]">
-                <label className="flex items-center space-x-1.5 cursor-pointer text-slate-400 hover:text-slate-200">
-                  <input
-                    type="checkbox"
-                    checked={showTrajectories}
-                    onChange={(e) => setShowTrajectories(e.target.checked)}
-                    className="accent-cyan-400"
-                  />
-                  <span>Mission Trajectories</span>
-                </label>
-
-                <label className="flex items-center space-x-1.5 cursor-pointer text-slate-400 hover:text-slate-200">
-                  <input
-                    type="checkbox"
-                    checked={showSightlines}
-                    onChange={(e) => setShowSightlines(e.target.checked)}
-                    className="accent-cyan-400"
-                  />
-                  <span>Sightline Rays</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Radar Canvas with Interactive Hover */}
-            <div className="relative mt-4 flex items-center justify-center">
-              <canvas
-                ref={canvasRef}
-                width={560}
-                height={560}
-                onMouseMove={handleCanvasMouseMove}
-                onMouseLeave={handleCanvasMouseLeave}
-                className="h-[340px] w-[340px] sm:h-[440px] sm:w-[440px] md:h-[520px] md:w-[520px] cursor-crosshair rounded-full shadow-[0_0_30px_rgba(3,7,18,0.8)]"
-              />
-
-              {/* Interactive Hover Tooltip */}
-              {hoveredInfo && (
-                <div
-                  className="absolute pointer-events-none rounded-xl bg-luna-950/95 border border-luna-700 px-3 py-2 text-[11px] font-mono text-slate-200 shadow-2xl backdrop-blur-md z-20"
-                  style={{
-                    left: `${hoveredInfo.mouseX + 15}px`,
-                    top: `${hoveredInfo.mouseY - 20}px`,
-                  }}
-                >
-                  <div className="font-bold text-cyan-300">
-                    Azimuth: {hoveredInfo.azimuthDeg.toFixed(1)}°
-                  </div>
-                  <div className="text-rose-400">
-                    Terrain Obstruction: {hoveredInfo.horizonElevationDeg.toFixed(2)}°
-                  </div>
-                  <div className="text-slate-400">
-                    Blocking Peak Distance: {hoveredInfo.distanceKm.toFixed(1)} km
-                  </div>
-                  <div className="text-slate-500 text-[10px] mt-0.5">
-                    Feature: {hoveredInfo.feature}
-                  </div>
+      <div className="rounded-2xl border border-luna-800 bg-luna-900/70 p-4 md:p-6 shadow-xl">
+        <div className={viewMode === 'dual' ? 'grid grid-cols-1 xl:grid-cols-2 gap-6 items-start' : 'space-y-4'}>
+          {/* VIEW 1: COMBINED 360° POLAR RADAR */}
+          {(viewMode === 'radar' || viewMode === 'dual') && (
+            <div className={`flex flex-col items-center justify-center ${viewMode === 'dual' ? 'w-full bg-luna-950/40 p-4 rounded-2xl border border-luna-800/60' : ''}`}>
+              {/* View options bar */}
+              <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-luna-800 text-xs font-mono">
+                <div className="flex items-center space-x-2 text-slate-300 font-semibold">
+                  <Compass className="h-4 w-4 text-cyan-400" />
+                  <span>360° CELESTIAL HORIZON POLAR RADAR</span>
                 </div>
-              )}
-            </div>
 
-            <div className="mt-3 text-center text-[11px] font-mono text-slate-400 max-w-lg">
-              Center represents zenith ({maxRadarElevationDeg}° elevation); concentric blue dashed circle is the 0° Geometric Horizon.
-              The shaded red perimeter represents local LOLA DEM terrain obstruction.
-            </div>
-          </div>
-        )}
+                <div className="flex items-center space-x-4 text-[11px]">
+                  <label className="flex items-center space-x-1.5 cursor-pointer text-slate-400 hover:text-slate-200">
+                    <input
+                      type="checkbox"
+                      checked={showTrajectories}
+                      onChange={(e) => setShowTrajectories(e.target.checked)}
+                      className="accent-cyan-400"
+                    />
+                    <span>Trajectories</span>
+                  </label>
 
-        {/* VIEW 2: LINEAR 360° HORIZON PANORAMA STRIP */}
-        {viewMode === 'panorama' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-luna-800 text-xs font-mono">
-              <span className="text-slate-300 font-semibold flex items-center space-x-1.5">
-                <Mountain className="h-4 w-4 text-emerald-400" />
-                <span>360° PANORAMIC HORIZON ELEVATION STRIP (0° TO 360° AZIMUTH)</span>
-              </span>
-              <span className="text-slate-400 text-[11px]">
-                Sun (Yellow) & Earth (Cyan) clearance above local terrain profile
-              </span>
-            </div>
+                  <label className="flex items-center space-x-1.5 cursor-pointer text-slate-400 hover:text-slate-200">
+                    <input
+                      type="checkbox"
+                      checked={showSightlines}
+                      onChange={(e) => setShowSightlines(e.target.checked)}
+                      className="accent-cyan-400"
+                    />
+                    <span>Sightlines</span>
+                  </label>
+                </div>
+              </div>
 
-            <div className="h-96 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={panoramaData}>
-                  <defs>
-                    <linearGradient id="skyHorizonGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#F43F5E" stopOpacity={0.45} />
-                      <stop offset="95%" stopColor="#F43F5E" stopOpacity={0.05} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-                  <XAxis
-                    dataKey="azimuth_deg"
-                    stroke="#64748B"
-                    unit="°"
-                    tick={{ fontSize: 10 }}
-                    ticks={[0, 45, 90, 135, 180, 225, 270, 315, 360]}
-                  />
-                  <YAxis
-                    stroke="#64748B"
-                    unit="°"
-                    tick={{ fontSize: 10 }}
-                    domain={[-1.5, 8.5]}
-                  />
-                  <RechartsTooltip
-                    contentStyle={{ backgroundColor: '#0B0F19', borderColor: '#222E4A', borderRadius: '8px' }}
-                    labelFormatter={(az) => `Azimuth: ${az}°`}
-                    formatter={(val, name, item) => [
-                      `${Number(val).toFixed(2)}° (${item.payload.blocking_feature || 'Highland Topography'}, ${item.payload.distance_km || 0} km)`,
-                      name,
-                    ]}
-                  />
-                  <RechartsLegend wrapperStyle={{ fontSize: 11 }} />
-                  <ReferenceLine y={0} stroke="#38BDF8" strokeDasharray="3 3" label="0° Geometric Horizon" />
+              {/* Radar Canvas with Interactive Hover */}
+              <div className="relative mt-4 flex items-center justify-center">
+                <canvas
+                  ref={canvasRef}
+                  width={560}
+                  height={560}
+                  onMouseMove={handleCanvasMouseMove}
+                  onMouseLeave={handleCanvasMouseLeave}
+                  className="h-[340px] w-[340px] sm:h-[420px] sm:w-[420px] md:h-[480px] md:w-[480px] cursor-crosshair rounded-full shadow-[0_0_30px_rgba(3,7,18,0.8)]"
+                />
 
-                  {/* Terrain Profile Area */}
-                  <Area
-                    type="monotone"
-                    dataKey="horizon_elevation_deg"
-                    name="LOLA Terrain Horizon Mask (°)"
-                    stroke="#F43F5E"
-                    fill="url(#skyHorizonGrad)"
-                    strokeWidth={2}
-                  />
-
-                  {/* Active Sun Reference Dot */}
-                  <ReferenceDot
-                    x={Math.round(sunAzimuth)}
-                    y={sunElevation}
-                    r={6}
-                    fill={sunIsVisible ? '#FDE047' : '#78350F'}
-                    stroke={sunIsVisible ? '#FFFFFF' : '#EF4444'}
-                    strokeWidth={2}
-                    label={{
-                      value: `Sun (${sunElevation.toFixed(1)}°)`,
-                      fill: '#FDE047',
-                      fontSize: 10,
-                      position: 'top',
+                {/* Interactive Hover Tooltip */}
+                {hoveredInfo && (
+                  <div
+                    className="absolute pointer-events-none rounded-xl bg-luna-950/95 border border-luna-700 px-3 py-2 text-[11px] font-mono text-slate-200 shadow-2xl backdrop-blur-md z-20"
+                    style={{
+                      left: `${hoveredInfo.mouseX + 15}px`,
+                      top: `${hoveredInfo.mouseY - 20}px`,
                     }}
-                  />
+                  >
+                    <div className="font-bold text-cyan-300">
+                      Azimuth: {hoveredInfo.azimuthDeg != null ? Number(hoveredInfo.azimuthDeg).toFixed(1) : '—'}°
+                    </div>
+                    <div className="text-rose-400">
+                      Terrain Obstruction: {hoveredInfo.horizonElevationDeg != null ? Number(hoveredInfo.horizonElevationDeg).toFixed(2) : '—'}°
+                    </div>
+                    <div className="text-slate-400">
+                      Blocking Peak Distance: {hoveredInfo.distanceKm != null ? Number(hoveredInfo.distanceKm).toFixed(1) : '—'} km
+                    </div>
+                    <div className="text-slate-500 text-[10px] mt-0.5">
+                      Feature: {hoveredInfo.feature}
+                    </div>
+                  </div>
+                )}
+              </div>
 
-                  {/* Active Earth Reference Dot */}
-                  <ReferenceDot
-                    x={Math.round(earthAzimuth)}
-                    y={earthElevation}
-                    r={6}
-                    fill={earthIsVisible ? '#0284C7' : '#164E63'}
-                    stroke={earthIsVisible ? '#38BDF8' : '#EF4444'}
-                    strokeWidth={2}
-                    label={{
-                      value: `Earth (${earthElevation.toFixed(1)}°)`,
-                      fill: '#38BDF8',
-                      fontSize: 10,
-                      position: 'top',
-                    }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <div className="mt-3 text-center text-[11px] font-mono text-slate-400 max-w-lg">
+                Center: zenith ({maxRadarElevationDeg}°); blue ring: 0° horizon; red perimeter: LOLA DEM mask.
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* VIEW 3: SYNCHRONIZED 3D SURFACE SCENE (Task 7) */}
-        {(viewMode === '3d' || viewMode === 'dual') && (
-          <div className="space-y-3">
-            {viewMode === '3d' && (
+          {/* VIEW 2: LINEAR 360° HORIZON PANORAMA STRIP */}
+          {viewMode === 'panorama' && (
+            <div className="space-y-4 w-full">
               <div className="flex items-center justify-between pb-2 border-b border-luna-800 text-xs font-mono">
                 <span className="text-slate-300 font-semibold flex items-center space-x-1.5">
-                  <Compass className="h-4 w-4 text-cyan-400" />
-                  <span>SYNCHRONIZED 3D LUNAR SURFACE & CELESTIAL VECTORS</span>
+                  <Mountain className="h-4 w-4 text-emerald-400" />
+                  <span>360° PANORAMIC HORIZON ELEVATION STRIP (0° TO 360° AZIMUTH)</span>
                 </span>
                 <span className="text-slate-400 text-[11px]">
-                  Real-time sunlight ray shadows & Earth radio direction vector
+                  Sun (Yellow) &amp; Earth (Cyan) clearance above local terrain profile
                 </span>
               </div>
-            )}
 
-            <div className="h-[440px] md:h-[520px] w-full">
-              <SynchronizedSky3D
-                currentSite={selectedSite}
-                sunAzimuthDeg={sunAzimuth}
-                sunElevationDeg={sunElevation}
-                sunIsVisible={sunIsVisible}
-                earthAzimuthDeg={earthAzimuth}
-                earthElevationDeg={earthElevation}
-                earthIsVisible={earthIsVisible}
-                observerHeightM={missionConfig?.mastHeightM || 2.0}
-              />
+              <div className="h-96 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={panoramaData}>
+                    <defs>
+                      <linearGradient id="skyHorizonGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#F43F5E" stopOpacity={0.45} />
+                        <stop offset="95%" stopColor="#F43F5E" stopOpacity={0.05} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
+                    <XAxis
+                      dataKey="azimuth_deg"
+                      stroke="#64748B"
+                      unit="°"
+                      tick={{ fontSize: 10 }}
+                      ticks={[0, 45, 90, 135, 180, 225, 270, 315, 360]}
+                    />
+                    <YAxis
+                      stroke="#64748B"
+                      unit="°"
+                      tick={{ fontSize: 10 }}
+                      domain={[-1.5, 8.5]}
+                    />
+                    <RechartsTooltip
+                      contentStyle={{ backgroundColor: '#0B0F19', borderColor: '#222E4A', borderRadius: '8px' }}
+                      labelFormatter={(az) => `Azimuth: ${az}°`}
+                      formatter={(val, name, item) => [
+                        `${Number(val).toFixed(2)}° (${item.payload.blocking_feature || 'Highland Topography'}, ${item.payload.distance_km || 0} km)`,
+                        name,
+                      ]}
+                    />
+                    <RechartsLegend wrapperStyle={{ fontSize: 11 }} />
+                    <ReferenceLine y={0} stroke="#38BDF8" strokeDasharray="3 3" label="0° Geometric Horizon" />
+
+                    {/* Terrain Profile Area */}
+                    <Area
+                      type="monotone"
+                      dataKey="horizon_elevation_deg"
+                      name="LOLA Terrain Horizon Mask (°)"
+                      stroke="#F43F5E"
+                      fill="url(#skyHorizonGrad)"
+                      strokeWidth={2}
+                    />
+
+                    {/* Active Sun Reference Dot */}
+                    <ReferenceDot
+                      x={Math.round(sunAzimuth)}
+                      y={sunElevation}
+                      r={6}
+                      fill={sunIsVisible ? '#FDE047' : '#78350F'}
+                      stroke={sunIsVisible ? '#FFFFFF' : '#EF4444'}
+                      strokeWidth={2}
+                      label={{
+                        value: `Sun (${sunElevation.toFixed(1)}°)`,
+                        fill: '#FDE047',
+                        fontSize: 10,
+                        position: 'top',
+                      }}
+                    />
+
+                    {/* Active Earth Reference Dot */}
+                    <ReferenceDot
+                      x={Math.round(earthAzimuth)}
+                      y={earthElevation}
+                      r={6}
+                      fill={earthIsVisible ? '#0284C7' : '#164E63'}
+                      stroke={earthIsVisible ? '#38BDF8' : '#EF4444'}
+                      strokeWidth={2}
+                      label={{
+                        value: `Earth (${earthElevation.toFixed(1)}°)`,
+                        fill: '#38BDF8',
+                        fontSize: 10,
+                        position: 'top',
+                      }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* VIEW 3: SYNCHRONIZED 3D SURFACE SCENE (Task 7) */}
+          {(viewMode === '3d' || viewMode === 'dual') && (
+            <div className={`space-y-3 ${viewMode === 'dual' ? 'w-full bg-luna-950/40 p-4 rounded-2xl border border-luna-800/60' : 'w-full'}`}>
+              <div className="flex items-center justify-between pb-3 border-b border-luna-800 text-xs font-mono">
+                <span className="text-slate-300 font-semibold flex items-center space-x-1.5">
+                  <Compass className="h-4 w-4 text-cyan-400" />
+                  <span>SYNCHRONIZED 3D LUNAR SURFACE &amp; CELESTIAL VECTORS</span>
+                </span>
+                <span className="text-slate-400 text-[11px]">
+                  Real-time sunlight ray shadows &amp; Earth radio vector
+                </span>
+              </div>
+
+              <div className="h-[420px] md:h-[500px] w-full">
+                <SynchronizedSky3D
+                  currentSite={selectedSite}
+                  sunAzimuthDeg={sunAzimuth}
+                  sunElevationDeg={sunElevation}
+                  sunIsVisible={sunIsVisible}
+                  earthAzimuthDeg={earthAzimuth}
+                  earthElevationDeg={earthElevation}
+                  earthIsVisible={earthIsVisible}
+                  observerHeightM={missionConfig?.mastHeightM || 2.0}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 4. VISUALIZATION LEGEND & EXPLANATORY GUIDE (Task 6) */}

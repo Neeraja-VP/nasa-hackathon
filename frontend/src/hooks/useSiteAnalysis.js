@@ -4,8 +4,9 @@ import {
   calculateCommunication,
   getTerrainHorizon,
 } from '../services/api';
+import { toUtcIsoString } from '../utils/formatters';
 
-export function useSiteAnalysis(currentSite, missionConfig) {
+export function useSiteAnalysis(currentSite, missionConfig = {}) {
   const [illuminationData, setIlluminationData] = useState(null);
   const [communicationData, setCommunicationData] = useState(null);
   const [terrainHorizonData, setTerrainHorizonData] = useState(null);
@@ -26,10 +27,10 @@ export function useSiteAnalysis(currentSite, missionConfig) {
       latitude: currentSite.latitude,
       longitude: currentSite.longitude,
       elevation_m: currentSite.elevation_m,
-      start_date: new Date(missionConfig.startDate).toISOString(),
-      duration_days: Number(missionConfig.durationDays),
-      step_hours: Number(missionConfig.stepHours),
-      use_live_horizons: Boolean(missionConfig.useLiveHorizons),
+      start_date: toUtcIsoString(missionConfig?.startDate),
+      duration_days: Number(missionConfig?.durationDays || 14.0),
+      step_hours: Number(missionConfig?.stepHours || 2.0),
+      use_live_horizons: Boolean(missionConfig?.useLiveHorizons ?? true),
     };
 
     async function loadAnalysis() {
@@ -37,21 +38,21 @@ export function useSiteAnalysis(currentSite, missionConfig) {
         const [illumRes, commRes, terrRes] = await Promise.allSettled([
           calculateIllumination({
             ...payloadBase,
-            use_terrain_horizon: missionConfig.useTerrainHorizon,
-            mast_height_m: missionConfig.mastHeightM,
+            use_terrain_horizon: Boolean(missionConfig?.useTerrainHorizon ?? true),
+            mast_height_m: Number(missionConfig?.mastHeightM || 2.0),
           }),
           calculateCommunication({
             ...payloadBase,
-            min_comm_elevation_deg: missionConfig.minCommElevationDeg,
-            use_terrain_horizon: missionConfig.useTerrainHorizon,
-            antenna_height_m: missionConfig.antennaHeightM || 2.5,
+            min_comm_elevation_deg: Number(missionConfig?.minCommElevationDeg ?? 0.0),
+            use_terrain_horizon: Boolean(missionConfig?.useTerrainHorizon ?? true),
+            antenna_height_m: Number(missionConfig?.antennaHeightM || 2.5),
           }),
           getTerrainHorizon({
             latitude: currentSite.latitude,
             longitude: currentSite.longitude,
             elevation_m: currentSite.elevation_m,
             azimuth_step_deg: 5.0,
-            observer_height_m: missionConfig.mastHeightM,
+            observer_height_m: Number(missionConfig?.mastHeightM || 2.0),
           }),
         ]);
 
@@ -98,14 +99,17 @@ export function useSiteAnalysis(currentSite, missionConfig) {
     loadAnalysis();
   }, [
     currentSite?.id,
-    missionConfig.startDate,
-    missionConfig.durationDays,
-    missionConfig.stepHours,
-    missionConfig.useTerrainHorizon,
-    missionConfig.mastHeightM,
-    missionConfig.minCommElevationDeg,
-    missionConfig.antennaHeightM,
-    missionConfig.useLiveHorizons,
+    currentSite?.latitude,
+    currentSite?.longitude,
+    currentSite?.elevation_m,
+    missionConfig?.startDate,
+    missionConfig?.durationDays,
+    missionConfig?.stepHours,
+    missionConfig?.useTerrainHorizon,
+    missionConfig?.mastHeightM,
+    missionConfig?.minCommElevationDeg,
+    missionConfig?.antennaHeightM,
+    missionConfig?.useLiveHorizons,
   ]);
 
   return {

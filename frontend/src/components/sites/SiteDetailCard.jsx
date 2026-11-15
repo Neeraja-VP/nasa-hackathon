@@ -116,9 +116,9 @@ export default function SiteDetailCard({
             </button>
 
             <button
-              onClick={() => onNavigateTab && onNavigateTab('quickmap')}
+              onClick={() => onNavigateTab && onNavigateTab('quickmap', 'specs')}
               className="rounded-xl border border-indigo-500/25 bg-indigo-500/5 p-3.5 text-center min-w-[110px] hover:bg-indigo-500/15 transition-colors cursor-pointer text-left"
-              title="Open LROC QuickMap Stack #3314 (Polar Stereographic)"
+              title="Open LROC QuickMap Stack #3314 Technical Specifications"
             >
               <span className="text-[10px] uppercase font-mono text-indigo-400 block flex items-center justify-between">
                 <span>QuickMap</span>

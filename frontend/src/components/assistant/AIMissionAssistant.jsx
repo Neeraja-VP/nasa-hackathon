@@ -218,19 +218,19 @@ export default function AIMissionAssistant({ currentSite, missionConfig }) {
                     {data.scientific_evidence.communication_percentage != null && (
                       <div className="rounded bg-luna-900 p-2 border border-luna-800">
                         <span className="text-slate-400 block">Earth Comm</span>
-                        <strong className="text-cyan-400">{data.scientific_evidence.communication_percentage}%</strong>
+                        <strong className="text-cyan-400">{Number(data.scientific_evidence.communication_percentage).toFixed(1)}%</strong>
                       </div>
                     )}
                     {data.scientific_evidence.slope_degrees != null && (
                       <div className="rounded bg-luna-900 p-2 border border-luna-800">
                         <span className="text-slate-400 block">Slope</span>
-                        <strong className="text-slate-200">{data.scientific_evidence.slope_degrees}°</strong>
+                        <strong className="text-slate-200">{Number(data.scientific_evidence.slope_degrees).toFixed(1)}°</strong>
                       </div>
                     )}
                     {data.scientific_evidence.elevation_m != null && (
                       <div className="rounded bg-luna-900 p-2 border border-luna-800">
                         <span className="text-slate-400 block">Elevation</span>
-                        <strong className="text-slate-200">{data.scientific_evidence.elevation_m.toFixed(0)} m</strong>
+                        <strong className="text-slate-200">{Number(data.scientific_evidence.elevation_m).toFixed(0)} m</strong>
                       </div>
                     )}
                   </div>

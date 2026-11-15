@@ -456,7 +456,7 @@ export default function EarthVisualization({
                     <td className="py-2 px-3">
                       {win.mean_link_margin_db !== undefined && win.mean_link_margin_db !== null ? (
                         <span className={win.mean_link_margin_db >= 3.0 ? 'text-emerald-400' : 'text-amber-400'}>
-                          +{win.mean_link_margin_db.toFixed(1)} dB
+                          {win.mean_link_margin_db >= 0 ? `+${Number(win.mean_link_margin_db).toFixed(1)}` : Number(win.mean_link_margin_db).toFixed(1)} dB
                         </span>
                       ) : (
                         '—'

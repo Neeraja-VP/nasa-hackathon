@@ -23,8 +23,16 @@ import { DEFAULT_MISSION_CONFIG } from './utils/constants';
 export default function App() {
   // Navigation State
   const [activeTab, setActiveTab] = useState('overview');
+  const [quickMapInitialMode, setQuickMapInitialMode] = useState('canvas');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [customSiteModalOpen, setCustomSiteModalOpen] = useState(false);
+
+  const handleNavigateTab = (tab, subMode) => {
+    setActiveTab(tab);
+    if (tab === 'quickmap' && subMode) {
+      setQuickMapInitialMode(subMode);
+    }
+  };
 
   // Global Mission Parameters
   const [missionConfig, setMissionConfig] = useState(DEFAULT_MISSION_CONFIG);
@@ -134,7 +142,7 @@ export default function App() {
               site={selectedSite}
               illuminationData={illuminationData}
               communicationData={communicationData}
-              onNavigateTab={setActiveTab}
+              onNavigateTab={handleNavigateTab}
             />
           )}
 
@@ -146,7 +154,7 @@ export default function App() {
                 selectedSiteId={selectedSiteId}
                 onSelectSite={setSelectedSiteId}
                 currentSite={selectedSite}
-                onNavigateTab={setActiveTab}
+                onNavigateTab={handleNavigateTab}
               />
             </div>
           )}
@@ -160,7 +168,7 @@ export default function App() {
                 onSelectSite={setSelectedSiteId}
                 currentSite={selectedSite}
                 missionConfig={missionConfig}
-                onNavigateTab={setActiveTab}
+                onNavigateTab={handleNavigateTab}
               />
             </div>
           )}
@@ -173,6 +181,7 @@ export default function App() {
                 selectedSiteId={selectedSiteId}
                 onSelectSite={setSelectedSiteId}
                 currentSite={selectedSite}
+                initialMode={quickMapInitialMode}
               />
             </div>
           )}
@@ -199,7 +208,7 @@ export default function App() {
               loading={analysisLoading}
               error={analysisError}
               onRetry={() => {}}
-              onNavigateTab={setActiveTab}
+              onNavigateTab={handleNavigateTab}
             />
           )}
 
@@ -211,7 +220,7 @@ export default function App() {
               loading={analysisLoading}
               error={analysisError}
               onRetry={() => {}}
-              onNavigateTab={setActiveTab}
+              onNavigateTab={handleNavigateTab}
             />
           )}
 
@@ -222,7 +231,7 @@ export default function App() {
               loading={analysisLoading}
               error={analysisError}
               onRetry={() => {}}
-              onNavigateTab={setActiveTab}
+              onNavigateTab={handleNavigateTab}
             />
           )}
 

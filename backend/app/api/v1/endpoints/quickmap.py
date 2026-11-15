@@ -19,10 +19,11 @@ router = APIRouter(prefix="/quickmap", tags=["LROC QuickMap"])
 
 LROC_QUICKMAP_BASE = "https://quickmap.lroc.im-ldi.com/"
 CANONICAL_SHARE_URL = "https://share.google/sCb5mzv7y0G7kEfA4"
+CANONICAL_DEFS = "N4IgzGCMAsIFygPYAcCGBjAlgFwJ70gF9Cg"
 CANONICAL_RESOLVED_URL = (
     "https://quickmap.lroc.im-ldi.com/?prjExtent=-3051793.6799876%2C-3012593.8734225"
     "%2C2175523.681406%2C3149731.2394266&earthShadowEnabled=true&proj=10&stack=3314"
-    "&defs=N4IgzGCMAsIFygPYAcCGBjAlgFwJ70gF9Cg"
+    f"&defs={CANONICAL_DEFS}"
 )
 
 
@@ -48,6 +49,7 @@ def build_quickmap_site_url(lat_deg: float, lon_deg: float, radius_km: float = 7
     return (
         f"{LROC_QUICKMAP_BASE}?prjExtent={extent_str}"
         f"&earthShadowEnabled=true&proj=10&stack=3314"
+        f"&defs={CANONICAL_DEFS}"
     )
 
 
@@ -110,6 +112,7 @@ def get_quickmap_metadata():
             standard_parallel_deg=-90.0
         ),
         stack_id=3314,
+        defs=CANONICAL_DEFS,
         earth_shadow_enabled=True,
         extent=[-3051793.68, -3012593.87, 2175523.68, 3149731.24],
         layers=layers,
@@ -146,5 +149,6 @@ def get_quickmap_url(
         longitude=target_lon,
         site_id=site_id,
         stack_id=3314,
+        defs=CANONICAL_DEFS,
         earth_shadow_enabled=True
     )

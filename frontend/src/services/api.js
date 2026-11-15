@@ -101,6 +101,17 @@ export const queryAssistant = async (params) => {
   return response.data;
 };
 
+// 10. NASA LROC QuickMap (Stack #3314 Integration)
+export const getQuickMapMetadata = async () => {
+  const response = await apiClient.get('/quickmap/metadata');
+  return response.data;
+};
+
+export const getQuickMapUrl = async (params = {}) => {
+  const response = await apiClient.get('/quickmap/url', { params });
+  return response.data;
+};
+
 // Health Check
 export const checkHealth = async () => {
   const response = await apiClient.get('/health');

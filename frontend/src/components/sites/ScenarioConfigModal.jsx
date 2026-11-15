@@ -140,9 +140,9 @@ export default function ScenarioConfigModal({
                 className="w-full rounded-lg border border-luna-700 bg-luna-900 px-3 py-2 text-white focus:border-cyan-500 focus:outline-none"
               >
                 <option value="">— Use Custom Coordinates Below —</option>
-                {sites.map((s) => (
+                {(sites || []).map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name} ({s.latitude.toFixed(2)}°S, {s.longitude.toFixed(2)}°E, {s.elevation_m}m)
+                    {s.name} ({Number(s.latitude ?? 0).toFixed(2)}°S, {Number(s.longitude ?? 0).toFixed(2)}°E, {s.elevation_m}m)
                   </option>
                 ))}
               </select>

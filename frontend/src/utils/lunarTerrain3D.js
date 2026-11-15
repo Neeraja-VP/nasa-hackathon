@@ -190,6 +190,10 @@ export function buildSouthPoleTerrainGeometry(gridSegments = 140, extentKm = SOU
   // Default color attribute
   geo.setAttribute('color', new THREE.BufferAttribute(colorsRegolith.slice(), 3));
 
+  geo.geometry = geo;
+  geo.elevations = elevations;
+  geo.slopes = slopes;
+
   return { geometry: geo, elevations, slopes };
 }
 

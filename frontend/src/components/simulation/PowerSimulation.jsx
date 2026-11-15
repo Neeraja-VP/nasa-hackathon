@@ -47,11 +47,12 @@ import {
   formatDateTime,
   formatDateShort,
   formatHours,
+  toUtcIsoString,
 } from '../../utils/formatters';
 
 export default function PowerSimulation({
   currentSite,
-  missionConfig,
+  missionConfig = {},
 }) {
   const [simConfig, setSimConfig] = useState(DEFAULT_SIMULATION_CONFIG);
   const [simulationData, setSimulationData] = useState(null);
@@ -68,10 +69,10 @@ export default function PowerSimulation({
     try {
       const res = await simulateMission({
         site_id: currentSite.id,
-        start_date: new Date(missionConfig.startDate).toISOString(),
-        duration_days: Number(missionConfig.durationDays),
-        step_hours: Number(missionConfig.stepHours),
-        use_live_horizons: Boolean(missionConfig.useLiveHorizons),
+        start_date: toUtcIsoString(missionConfig?.startDate),
+        duration_days: Number(missionConfig?.durationDays || 14.0),
+        step_hours: Number(missionConfig?.stepHours || 2.0),
+        use_live_horizons: Boolean(missionConfig?.useLiveHorizons ?? true),
         ...simConfig,
       });
       setSimulationData(res);
@@ -87,7 +88,13 @@ export default function PowerSimulation({
     if (currentSite) {
       handleRunSimulation();
     }
-  }, [currentSite?.id, missionConfig.startDate, missionConfig.durationDays, missionConfig.useLiveHorizons]);
+  }, [
+    currentSite?.id,
+    missionConfig?.startDate,
+    missionConfig?.durationDays,
+    missionConfig?.stepHours,
+    missionConfig?.useLiveHorizons,
+  ]);
 
   const applyPreset = (key) => {
     const p = SIMULATION_PRESETS[key];
@@ -139,8 +146,8 @@ export default function PowerSimulation({
           value={
             simulationData
               ? simulationData.estimated_survival_duration_hours !== null && simulationData.estimated_survival_duration_hours !== undefined
-                ? `${simulationData.estimated_survival_duration_hours.toFixed(0)} h`
-                : `${(missionConfig.durationDays * 24).toFixed(0)} h (Full)`
+                ? `${Number(simulationData.estimated_survival_duration_hours).toFixed(0)} h`
+                : `${((missionConfig?.durationDays || 14) * 24).toFixed(0)} h (Full)`
               : '—'
           }
           sublabel={

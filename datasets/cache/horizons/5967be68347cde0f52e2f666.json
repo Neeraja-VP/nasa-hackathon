@@ -1,0 +1,684 @@
+{
+  "cache_key": "399:-89.44:222.50:820:2026-11-30T18:30:00+00:00:2026-12-14T18:30:00+00:00:3.0",
+  "cached_at": "2026-11-15T12:55:21.769376+00:00",
+  "records": [
+    {
+      "timestamp_str": "2026-Nov-30 18:30",
+      "azimuth_deg": 144.06,
+      "elevation_deg": -1.71,
+      "distance_km": 375410.4
+    },
+    {
+      "timestamp_str": "2026-Nov-30 21:30",
+      "azimuth_deg": 144.12,
+      "elevation_deg": -1.9,
+      "distance_km": 376045.8
+    },
+    {
+      "timestamp_str": "2026-Dec-01 00:30",
+      "azimuth_deg": 144.17,
+      "elevation_deg": -2.1,
+      "distance_km": 376681.8
+    },
+    {
+      "timestamp_str": "2026-Dec-01 03:30",
+      "azimuth_deg": 144.21,
+      "elevation_deg": -2.29,
+      "distance_km": 377317.8
+    },
+    {
+      "timestamp_str": "2026-Dec-01 06:30",
+      "azimuth_deg": 144.25,
+      "elevation_deg": -2.48,
+      "distance_km": 377953.3
+    },
+    {
+      "timestamp_str": "2026-Dec-01 09:30",
+      "azimuth_deg": 144.29,
+      "elevation_deg": -2.66,
+      "distance_km": 378587.6
+    },
+    {
+      "timestamp_str": "2026-Dec-01 12:30",
+      "azimuth_deg": 144.32,
+      "elevation_deg": -2.85,
+      "distance_km": 379220.3
+    },
+    {
+      "timestamp_str": "2026-Dec-01 15:30",
+      "azimuth_deg": 144.34,
+      "elevation_deg": -3.03,
+      "distance_km": 379850.8
+    },
+    {
+      "timestamp_str": "2026-Dec-01 18:30",
+      "azimuth_deg": 144.36,
+      "elevation_deg": -3.21,
+      "distance_km": 380478.5
+    },
+    {
+      "timestamp_str": "2026-Dec-01 21:30",
+      "azimuth_deg": 144.37,
+      "elevation_deg": -3.39,
+      "distance_km": 381103.1
+    },
+    {
+      "timestamp_str": "2026-Dec-02 00:30",
+      "azimuth_deg": 144.38,
+      "elevation_deg": -3.56,
+      "distance_km": 381724.1
+    },
+    {
+      "timestamp_str": "2026-Dec-02 03:30",
+      "azimuth_deg": 144.39,
+      "elevation_deg": -3.73,
+      "distance_km": 382340.9
+    },
+    {
+      "timestamp_str": "2026-Dec-02 06:30",
+      "azimuth_deg": 144.39,
+      "elevation_deg": -3.9,
+      "distance_km": 382953.4
+    },
+    {
+      "timestamp_str": "2026-Dec-02 09:30",
+      "azimuth_deg": 144.38,
+      "elevation_deg": -4.06,
+      "distance_km": 383561.0
+    },
+    {
+      "timestamp_str": "2026-Dec-02 12:30",
+      "azimuth_deg": 144.37,
+      "elevation_deg": -4.22,
+      "distance_km": 384163.3
+    },
+    {
+      "timestamp_str": "2026-Dec-02 15:30",
+      "azimuth_deg": 144.36,
+      "elevation_deg": -4.38,
+      "distance_km": 384760.2
+    },
+    {
+      "timestamp_str": "2026-Dec-02 18:30",
+      "azimuth_deg": 144.34,
+      "elevation_deg": -4.54,
+      "distance_km": 385351.2
+    },
+    {
+      "timestamp_str": "2026-Dec-02 21:30",
+      "azimuth_deg": 144.32,
+      "elevation_deg": -4.69,
+      "distance_km": 385936.0
+    },
+    {
+      "timestamp_str": "2026-Dec-03 00:30",
+      "azimuth_deg": 144.29,
+      "elevation_deg": -4.84,
+      "distance_km": 386514.4
+    },
+    {
+      "timestamp_str": "2026-Dec-03 03:30",
+      "azimuth_deg": 144.26,
+      "elevation_deg": -4.98,
+      "distance_km": 387086.2
+    },
+    {
+      "timestamp_str": "2026-Dec-03 06:30",
+      "azimuth_deg": 144.23,
+      "elevation_deg": -5.12,
+      "distance_km": 387651.1
+    },
+    {
+      "timestamp_str": "2026-Dec-03 09:30",
+      "azimuth_deg": 144.19,
+      "elevation_deg": -5.26,
+      "distance_km": 388208.8
+    },
+    {
+      "timestamp_str": "2026-Dec-03 12:30",
+      "azimuth_deg": 144.15,
+      "elevation_deg": -5.39,
+      "distance_km": 388759.3
+    },
+    {
+      "timestamp_str": "2026-Dec-03 15:30",
+      "azimuth_deg": 144.11,
+      "elevation_deg": -5.52,
+      "distance_km": 389302.3
+    },
+    {
+      "timestamp_str": "2026-Dec-03 18:30",
+      "azimuth_deg": 144.06,
+      "elevation_deg": -5.64,
+      "distance_km": 389837.7
+    },
+    {
+      "timestamp_str": "2026-Dec-03 21:30",
+      "azimuth_deg": 144.01,
+      "elevation_deg": -5.76,
+      "distance_km": 390365.3
+    },
+    {
+      "timestamp_str": "2026-Dec-04 00:30",
+      "azimuth_deg": 143.96,
+      "elevation_deg": -5.88,
+      "distance_km": 390885.0
+    },
+    {
+      "timestamp_str": "2026-Dec-04 03:30",
+      "azimuth_deg": 143.9,
+      "elevation_deg": -5.99,
+      "distance_km": 391396.7
+    },
+    {
+      "timestamp_str": "2026-Dec-04 06:30",
+      "azimuth_deg": 143.84,
+      "elevation_deg": -6.09,
+      "distance_km": 391900.4
+    },
+    {
+      "timestamp_str": "2026-Dec-04 09:30",
+      "azimuth_deg": 143.77,
+      "elevation_deg": -6.2,
+      "distance_km": 392395.9
+    },
+    {
+      "timestamp_str": "2026-Dec-04 12:30",
+      "azimuth_deg": 143.71,
+      "elevation_deg": -6.29,
+      "distance_km": 392883.1
+    },
+    {
+      "timestamp_str": "2026-Dec-04 15:30",
+      "azimuth_deg": 143.64,
+      "elevation_deg": -6.39,
+      "distance_km": 393362.1
+    },
+    {
+      "timestamp_str": "2026-Dec-04 18:30",
+      "azimuth_deg": 143.57,
+      "elevation_deg": -6.48,
+      "distance_km": 393832.7
+    },
+    {
+      "timestamp_str": "2026-Dec-04 21:30",
+      "azimuth_deg": 143.49,
+      "elevation_deg": -6.56,
+      "distance_km": 394294.9
+    },
+    {
+      "timestamp_str": "2026-Dec-05 00:30",
+      "azimuth_deg": 143.41,
+      "elevation_deg": -6.64,
+      "distance_km": 394748.8
+    },
+    {
+      "timestamp_str": "2026-Dec-05 03:30",
+      "azimuth_deg": 143.33,
+      "elevation_deg": -6.72,
+      "distance_km": 395194.2
+    },
+    {
+      "timestamp_str": "2026-Dec-05 06:30",
+      "azimuth_deg": 143.25,
+      "elevation_deg": -6.79,
+      "distance_km": 395631.3
+    },
+    {
+      "timestamp_str": "2026-Dec-05 09:30",
+      "azimuth_deg": 143.16,
+      "elevation_deg": -6.85,
+      "distance_km": 396059.9
+    },
+    {
+      "timestamp_str": "2026-Dec-05 12:30",
+      "azimuth_deg": 143.07,
+      "elevation_deg": -6.92,
+      "distance_km": 396480.0
+    },
+    {
+      "timestamp_str": "2026-Dec-05 15:30",
+      "azimuth_deg": 142.98,
+      "elevation_deg": -6.97,
+      "distance_km": 396891.8
+    },
+    {
+      "timestamp_str": "2026-Dec-05 18:30",
+      "azimuth_deg": 142.89,
+      "elevation_deg": -7.02,
+      "distance_km": 397295.1
+    },
+    {
+      "timestamp_str": "2026-Dec-05 21:30",
+      "azimuth_deg": 142.79,
+      "elevation_deg": -7.07,
+      "distance_km": 397690.1
+    },
+    {
+      "timestamp_str": "2026-Dec-06 00:30",
+      "azimuth_deg": 142.7,
+      "elevation_deg": -7.11,
+      "distance_km": 398076.7
+    },
+    {
+      "timestamp_str": "2026-Dec-06 03:30",
+      "azimuth_deg": 142.6,
+      "elevation_deg": -7.15,
+      "distance_km": 398454.9
+    },
+    {
+      "timestamp_str": "2026-Dec-06 06:30",
+      "azimuth_deg": 142.49,
+      "elevation_deg": -7.19,
+      "distance_km": 398824.9
+    },
+    {
+      "timestamp_str": "2026-Dec-06 09:30",
+      "azimuth_deg": 142.39,
+      "elevation_deg": -7.21,
+      "distance_km": 399186.5
+    },
+    {
+      "timestamp_str": "2026-Dec-06 12:30",
+      "azimuth_deg": 142.28,
+      "elevation_deg": -7.24,
+      "distance_km": 399539.8
+    },
+    {
+      "timestamp_str": "2026-Dec-06 15:30",
+      "azimuth_deg": 142.17,
+      "elevation_deg": -7.25,
+      "distance_km": 399884.8
+    },
+    {
+      "timestamp_str": "2026-Dec-06 18:30",
+      "azimuth_deg": 142.06,
+      "elevation_deg": -7.27,
+      "distance_km": 400221.6
+    },
+    {
+      "timestamp_str": "2026-Dec-06 21:30",
+      "azimuth_deg": 141.95,
+      "elevation_deg": -7.28,
+      "distance_km": 400550.1
+    },
+    {
+      "timestamp_str": "2026-Dec-07 00:30",
+      "azimuth_deg": 141.83,
+      "elevation_deg": -7.28,
+      "distance_km": 400870.4
+    },
+    {
+      "timestamp_str": "2026-Dec-07 03:30",
+      "azimuth_deg": 141.71,
+      "elevation_deg": -7.28,
+      "distance_km": 401182.5
+    },
+    {
+      "timestamp_str": "2026-Dec-07 06:30",
+      "azimuth_deg": 141.59,
+      "elevation_deg": -7.28,
+      "distance_km": 401486.4
+    },
+    {
+      "timestamp_str": "2026-Dec-07 09:30",
+      "azimuth_deg": 141.47,
+      "elevation_deg": -7.27,
+      "distance_km": 401782.0
+    },
+    {
+      "timestamp_str": "2026-Dec-07 12:30",
+      "azimuth_deg": 141.35,
+      "elevation_deg": -7.25,
+      "distance_km": 402069.4
+    },
+    {
+      "timestamp_str": "2026-Dec-07 15:30",
+      "azimuth_deg": 141.22,
+      "elevation_deg": -7.23,
+      "distance_km": 402348.6
+    },
+    {
+      "timestamp_str": "2026-Dec-07 18:30",
+      "azimuth_deg": 141.09,
+      "elevation_deg": -7.21,
+      "distance_km": 402619.5
+    },
+    {
+      "timestamp_str": "2026-Dec-07 21:30",
+      "azimuth_deg": 140.96,
+      "elevation_deg": -7.18,
+      "distance_km": 402882.2
+    },
+    {
+      "timestamp_str": "2026-Dec-08 00:30",
+      "azimuth_deg": 140.83,
+      "elevation_deg": -7.15,
+      "distance_km": 403136.5
+    },
+    {
+      "timestamp_str": "2026-Dec-08 03:30",
+      "azimuth_deg": 140.7,
+      "elevation_deg": -7.11,
+      "distance_km": 403382.5
+    },
+    {
+      "timestamp_str": "2026-Dec-08 06:30",
+      "azimuth_deg": 140.56,
+      "elevation_deg": -7.07,
+      "distance_km": 403620.1
+    },
+    {
+      "timestamp_str": "2026-Dec-08 09:30",
+      "azimuth_deg": 140.42,
+      "elevation_deg": -7.02,
+      "distance_km": 403849.2
+    },
+    {
+      "timestamp_str": "2026-Dec-08 12:30",
+      "azimuth_deg": 140.29,
+      "elevation_deg": -6.97,
+      "distance_km": 404069.9
+    },
+    {
+      "timestamp_str": "2026-Dec-08 15:30",
+      "azimuth_deg": 140.14,
+      "elevation_deg": -6.92,
+      "distance_km": 404281.9
+    },
+    {
+      "timestamp_str": "2026-Dec-08 18:30",
+      "azimuth_deg": 140.0,
+      "elevation_deg": -6.86,
+      "distance_km": 404485.3
+    },
+    {
+      "timestamp_str": "2026-Dec-08 21:30",
+      "azimuth_deg": 139.86,
+      "elevation_deg": -6.79,
+      "distance_km": 404680.0
+    },
+    {
+      "timestamp_str": "2026-Dec-09 00:30",
+      "azimuth_deg": 139.71,
+      "elevation_deg": -6.73,
+      "distance_km": 404865.8
+    },
+    {
+      "timestamp_str": "2026-Dec-09 03:30",
+      "azimuth_deg": 139.56,
+      "elevation_deg": -6.65,
+      "distance_km": 405042.7
+    },
+    {
+      "timestamp_str": "2026-Dec-09 06:30",
+      "azimuth_deg": 139.41,
+      "elevation_deg": -6.58,
+      "distance_km": 405210.6
+    },
+    {
+      "timestamp_str": "2026-Dec-09 09:30",
+      "azimuth_deg": 139.26,
+      "elevation_deg": -6.5,
+      "distance_km": 405369.2
+    },
+    {
+      "timestamp_str": "2026-Dec-09 12:30",
+      "azimuth_deg": 139.11,
+      "elevation_deg": -6.41,
+      "distance_km": 405518.6
+    },
+    {
+      "timestamp_str": "2026-Dec-09 15:30",
+      "azimuth_deg": 138.95,
+      "elevation_deg": -6.33,
+      "distance_km": 405658.6
+    },
+    {
+      "timestamp_str": "2026-Dec-09 18:30",
+      "azimuth_deg": 138.8,
+      "elevation_deg": -6.24,
+      "distance_km": 405789.0
+    },
+    {
+      "timestamp_str": "2026-Dec-09 21:30",
+      "azimuth_deg": 138.64,
+      "elevation_deg": -6.14,
+      "distance_km": 405909.7
+    },
+    {
+      "timestamp_str": "2026-Dec-10 00:30",
+      "azimuth_deg": 138.48,
+      "elevation_deg": -6.04,
+      "distance_km": 406020.5
+    },
+    {
+      "timestamp_str": "2026-Dec-10 03:30",
+      "azimuth_deg": 138.32,
+      "elevation_deg": -5.94,
+      "distance_km": 406121.3
+    },
+    {
+      "timestamp_str": "2026-Dec-10 06:30",
+      "azimuth_deg": 138.16,
+      "elevation_deg": -5.83,
+      "distance_km": 406211.8
+    },
+    {
+      "timestamp_str": "2026-Dec-10 09:30",
+      "azimuth_deg": 137.99,
+      "elevation_deg": -5.72,
+      "distance_km": 406292.0
+    },
+    {
+      "timestamp_str": "2026-Dec-10 12:30",
+      "azimuth_deg": 137.83,
+      "elevation_deg": -5.61,
+      "distance_km": 406361.7
+    },
+    {
+      "timestamp_str": "2026-Dec-10 15:30",
+      "azimuth_deg": 137.66,
+      "elevation_deg": -5.49,
+      "distance_km": 406420.5
+    },
+    {
+      "timestamp_str": "2026-Dec-10 18:30",
+      "azimuth_deg": 137.49,
+      "elevation_deg": -5.37,
+      "distance_km": 406468.4
+    },
+    {
+      "timestamp_str": "2026-Dec-10 21:30",
+      "azimuth_deg": 137.33,
+      "elevation_deg": -5.25,
+      "distance_km": 406505.2
+    },
+    {
+      "timestamp_str": "2026-Dec-11 00:30",
+      "azimuth_deg": 137.16,
+      "elevation_deg": -5.13,
+      "distance_km": 406530.6
+    },
+    {
+      "timestamp_str": "2026-Dec-11 03:30",
+      "azimuth_deg": 136.99,
+      "elevation_deg": -5.0,
+      "distance_km": 406544.5
+    },
+    {
+      "timestamp_str": "2026-Dec-11 06:30",
+      "azimuth_deg": 136.82,
+      "elevation_deg": -4.87,
+      "distance_km": 406546.5
+    },
+    {
+      "timestamp_str": "2026-Dec-11 09:30",
+      "azimuth_deg": 136.64,
+      "elevation_deg": -4.73,
+      "distance_km": 406536.6
+    },
+    {
+      "timestamp_str": "2026-Dec-11 12:30",
+      "azimuth_deg": 136.47,
+      "elevation_deg": -4.6,
+      "distance_km": 406514.5
+    },
+    {
+      "timestamp_str": "2026-Dec-11 15:30",
+      "azimuth_deg": 136.3,
+      "elevation_deg": -4.46,
+      "distance_km": 406480.0
+    },
+    {
+      "timestamp_str": "2026-Dec-11 18:30",
+      "azimuth_deg": 136.13,
+      "elevation_deg": -4.31,
+      "distance_km": 406432.9
+    },
+    {
+      "timestamp_str": "2026-Dec-11 21:30",
+      "azimuth_deg": 135.95,
+      "elevation_deg": -4.17,
+      "distance_km": 406372.9
+    },
+    {
+      "timestamp_str": "2026-Dec-12 00:30",
+      "azimuth_deg": 135.78,
+      "elevation_deg": -4.02,
+      "distance_km": 406299.8
+    },
+    {
+      "timestamp_str": "2026-Dec-12 03:30",
+      "azimuth_deg": 135.6,
+      "elevation_deg": -3.87,
+      "distance_km": 406213.5
+    },
+    {
+      "timestamp_str": "2026-Dec-12 06:30",
+      "azimuth_deg": 135.43,
+      "elevation_deg": -3.72,
+      "distance_km": 406113.6
+    },
+    {
+      "timestamp_str": "2026-Dec-12 09:30",
+      "azimuth_deg": 135.25,
+      "elevation_deg": -3.57,
+      "distance_km": 406000.1
+    },
+    {
+      "timestamp_str": "2026-Dec-12 12:30",
+      "azimuth_deg": 135.08,
+      "elevation_deg": -3.41,
+      "distance_km": 405872.6
+    },
+    {
+      "timestamp_str": "2026-Dec-12 15:30",
+      "azimuth_deg": 134.9,
+      "elevation_deg": -3.25,
+      "distance_km": 405731.0
+    },
+    {
+      "timestamp_str": "2026-Dec-12 18:30",
+      "azimuth_deg": 134.73,
+      "elevation_deg": -3.1,
+      "distance_km": 405575.1
+    },
+    {
+      "timestamp_str": "2026-Dec-12 21:30",
+      "azimuth_deg": 134.55,
+      "elevation_deg": -2.93,
+      "distance_km": 405404.7
+    },
+    {
+      "timestamp_str": "2026-Dec-13 00:30",
+      "azimuth_deg": 134.38,
+      "elevation_deg": -2.77,
+      "distance_km": 405219.5
+    },
+    {
+      "timestamp_str": "2026-Dec-13 03:30",
+      "azimuth_deg": 134.21,
+      "elevation_deg": -2.61,
+      "distance_km": 405019.5
+    },
+    {
+      "timestamp_str": "2026-Dec-13 06:30",
+      "azimuth_deg": 134.04,
+      "elevation_deg": -2.44,
+      "distance_km": 404804.4
+    },
+    {
+      "timestamp_str": "2026-Dec-13 09:30",
+      "azimuth_deg": 133.87,
+      "elevation_deg": -2.27,
+      "distance_km": 404574.1
+    },
+    {
+      "timestamp_str": "2026-Dec-13 12:30",
+      "azimuth_deg": 133.7,
+      "elevation_deg": -2.11,
+      "distance_km": 404328.5
+    },
+    {
+      "timestamp_str": "2026-Dec-13 15:30",
+      "azimuth_deg": 133.53,
+      "elevation_deg": -1.94,
+      "distance_km": 404067.3
+    },
+    {
+      "timestamp_str": "2026-Dec-13 18:30",
+      "azimuth_deg": 133.36,
+      "elevation_deg": -1.77,
+      "distance_km": 403790.4
+    },
+    {
+      "timestamp_str": "2026-Dec-13 21:30",
+      "azimuth_deg": 133.19,
+      "elevation_deg": -1.6,
+      "distance_km": 403497.8
+    },
+    {
+      "timestamp_str": "2026-Dec-14 00:30",
+      "azimuth_deg": 133.03,
+      "elevation_deg": -1.42,
+      "distance_km": 403189.3
+    },
+    {
+      "timestamp_str": "2026-Dec-14 03:30",
+      "azimuth_deg": 132.87,
+      "elevation_deg": -1.25,
+      "distance_km": 402864.8
+    },
+    {
+      "timestamp_str": "2026-Dec-14 06:30",
+      "azimuth_deg": 132.7,
+      "elevation_deg": -1.08,
+      "distance_km": 402524.3
+    },
+    {
+      "timestamp_str": "2026-Dec-14 09:30",
+      "azimuth_deg": 132.55,
+      "elevation_deg": -0.9,
+      "distance_km": 402167.6
+    },
+    {
+      "timestamp_str": "2026-Dec-14 12:30",
+      "azimuth_deg": 132.39,
+      "elevation_deg": -0.73,
+      "distance_km": 401794.8
+    },
+    {
+      "timestamp_str": "2026-Dec-14 15:30",
+      "azimuth_deg": 132.24,
+      "elevation_deg": -0.55,
+      "distance_km": 401405.7
+    },
+    {
+      "timestamp_str": "2026-Dec-14 18:30",
+      "azimuth_deg": 132.08,
+      "elevation_deg": -0.38,
+      "distance_km": 401000.5
+    }
+  ]
+}

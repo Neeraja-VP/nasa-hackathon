@@ -54,3 +54,24 @@ export function formatHours(h, decimals = 1) {
   if (h === null || h === undefined || isNaN(h)) return '—';
   return `${Number(h).toFixed(decimals)} h`;
 }
+
+/**
+ * Ensures a date string is parsed in UTC without local timezone drift.
+ */
+export function toUtcIsoString(dateInput) {
+  if (!dateInput) return '2026-12-01T00:00:00.000Z';
+  if (typeof dateInput === 'string') {
+    if (dateInput.endsWith('Z')) {
+      const d = new Date(dateInput);
+      return isNaN(d.getTime()) ? '2026-12-01T00:00:00.000Z' : d.toISOString();
+    }
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dateInput)) {
+      return `${dateInput}:00.000Z`;
+    }
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(dateInput)) {
+      return `${dateInput}.000Z`;
+    }
+  }
+  const d = new Date(dateInput);
+  return isNaN(d.getTime()) ? '2026-12-01T00:00:00.000Z' : d.toISOString();
+}

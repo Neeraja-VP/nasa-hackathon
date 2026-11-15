@@ -78,6 +78,10 @@ export default function SynchronizedSky3D({
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     rendererRef.current = renderer;
+
+    while (mount.firstChild) {
+      mount.removeChild(mount.firstChild);
+    }
     mount.appendChild(renderer.domElement);
 
     // OrbitControls focused on the lander
@@ -95,7 +99,8 @@ export default function SynchronizedSky3D({
     scene.add(ambientLight);
 
     // 1. Lunar South Pole Terrain Mesh
-    const terrainGeo = buildSouthPoleTerrainGeometry(120, 240.0, 2.0);
+    const terrainData = buildSouthPoleTerrainGeometry(120, 240.0, 2.0);
+    const terrainGeo = terrainData.geometry || terrainData;
     const terrainMat = new THREE.MeshStandardMaterial({
       vertexColors: true,
       roughness: 0.95,
@@ -256,23 +261,31 @@ export default function SynchronizedSky3D({
     }
     animate();
 
-    // Handle Window Resize
+    // Handle Window Resize and Container Resize
     const handleResize = () => {
       if (!mount) return;
       const w = mount.clientWidth;
       const h = mount.clientHeight;
+      if (w === 0 || h === 0) return;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
     window.addEventListener('resize', handleResize);
 
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+    resizeObserver.observe(mount);
+
     return () => {
       window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (renderer.domElement && mount.contains(renderer.domElement)) {
         mount.removeChild(renderer.domElement);
       }
+      controls.dispose();
       renderer.dispose();
       terrainGeo.dispose();
       terrainMat.dispose();
@@ -282,6 +295,7 @@ export default function SynchronizedSky3D({
       bodyMat.dispose();
       earthGeo.dispose();
       earthMat.dispose();
+      earthTexture.dispose();
       sunGeo.dispose();
       sunMat.dispose();
     };
@@ -322,6 +336,7 @@ export default function SynchronizedSky3D({
       positions[4] = sunY;
       positions[5] = sunZ;
       sunBeamRef.current.geometry.attributes.position.needsUpdate = true;
+      sunBeamRef.current.geometry.computeBoundingSphere();
       sunBeamRef.current.computeLineDistances();
       sunBeamRef.current.material.color.set(sunIsVisible ? '#FBBF24' : '#EF4444');
     }
@@ -348,6 +363,7 @@ export default function SynchronizedSky3D({
       positions[4] = earthY;
       positions[5] = earthZ;
       earthBeamRef.current.geometry.attributes.position.needsUpdate = true;
+      earthBeamRef.current.geometry.computeBoundingSphere();
       earthBeamRef.current.material.color.set(earthIsVisible ? '#06B6D4' : '#EF4444');
     }
   }, [
